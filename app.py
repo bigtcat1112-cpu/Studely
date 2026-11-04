@@ -25,13 +25,13 @@ if uploaded_file is None:
     st.stop()
 
 raw_text = uploaded_file.read().decode("utf-8")
-flashcards_data =
+flashcards_data = []
 
 for line in raw_text.splitlines():
     if "-" in line:
         parts = line.split("-", 1)
-        term = parts.strip()
-        definition = parts.strip()
+        term = parts[0].strip()
+        definition = parts[1].strip()
         if term and definition:
             flashcards_data.append({"term": term, "definition": definition})
 
@@ -85,7 +85,7 @@ with tab2:
 # --- PODCAST LOUNGE ---
 with tab3:
     st.header("🎙️ Automated Goated Deep-Dive Podcast Lounge")
-    st.write("Click below to compile text scripts directly into an physical audio file track inside server memory.")
+    st.write("Click below to compile text scripts directly into a physical audio file track inside server memory.")
     
     if st.button("🚀 Initialize Factory Audio Conversion Engine", key="gen_podcast_btn"):
         with st.spinner("Factory Worker is compiling text scripts and generating physical MP3 data streams..."):

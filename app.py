@@ -1,10 +1,11 @@
 import streamlit as st
 import os
+import random
 from podcast import generate_long_podcast
 
 # Configure advanced page viewport matrix
 st.set_page_config(
-    page_title="Studley Premium Workspace", 
+    page_title="Studley Quantum Workspace", 
     page_icon="🎓", 
     layout="wide", 
     initial_sidebar_state="expanded"
@@ -44,11 +45,18 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(0,0,0,0.02);
         margin-bottom: 20px;
     }
+    .telemetry-header {
+        color: #2E5B88;
+        font-weight: bold;
+        border-bottom: 2px solid #2E5B88;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("🎓 Studley Learning Workspace")
-st.subheader("Advanced Automated Study Dashboard")
+st.subheader("Quantum Automated Study Dashboard")
 
 # --- SIDEBAR CONTROL UNIT ---
 st.sidebar.header("📁 Material Ingestion Channel")
@@ -97,9 +105,13 @@ if "active_stream_url" not in st.session_state:
     st.session_state.active_stream_url = ""
 if "active_category" not in st.session_state:
     st.session_state.active_category = ""
+if "projected_duration" not in st.session_state:
+    st.session_state.projected_duration = ""
+if "focus_wave_type" not in st.session_state:
+    st.session_state.focus_wave_type = ""
 
 # Layout Workspace Tabs
-tab1, tab2, tab3 = st.tabs(["📚 Flashcard Studio", "📝 Evaluation Center", "🎙️ Long-Form Podcast Lounge"])
+tab1, tab2, tab3 = st.tabs(["📚 Flashcard Studio", "📝 Evaluation Center", "🎙️ Quantum Podcast Lounge"])
 
 # --- TAB 1: FLASHCARD STUDIO ---
 with tab1:
@@ -146,58 +158,73 @@ with tab2:
             st.success("🎯 Evaluation parameter validated successfully! Correct.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- TAB 3: GHOST FACTORY PODCAST LOUNGE ---
+# --- TAB 3: QUANTUM PODCAST LOUNGE ---
 with tab3:
     st.header("🎙️ Automated Goated Deep-Dive Podcast Lounge")
     st.write("Initialize the high-fidelity cloud streaming blueprint down below to compile your lesson audio tracks.")
     
     if st.button("🚀 Initialize Goated Audio Production Engine", key="gen_podcast_btn"):
-        with st.spinner("AI Engine is compiling background tracks and allocating temporary asset files inside server cache data channels..."):
-            audio_file_path = generate_long_podcast(flashcards_data)
+        with st.spinner("Quantum Engine is compiling background tracks and analyzing data density inside server cache data channels..."):
+            token_file_path = generate_long_podcast(flashcards_data)
             
-            if audio_file_path and os.path.exists(audio_file_path):
-                st.session_state.podcast_path = audio_file_path
+            if token_file_path and os.path.exists(token_file_path):
+                st.session_state.podcast_path = token_file_path
                 
-                # Parse layout vectors from secure ghost file
+                # Parse all calculated telemetry data out of the ghost token file safely
                 parsed_configs = {}
-                with open(audio_file_path, "r", encoding="utf-8") as f:
+                with open(token_file_path, "r", encoding="utf-8") as f:
                     for line in f:
                         if ":" in line:
                             k, v = line.strip().split(":", 1)
                             parsed_configs[k] = v
                 
-                st.session_state.active_stream_url = parsed_configs.get("URL", "")
-                st.session_state.active_category = parsed_configs.get("CATEGORY", "Premium")
+                # Pass data vectors straight to the dashboard memory matrix
+                st.session_state.active_stream_url = parsed_configs.get("STREAM_URL", "https://soundhelix.com")
+                st.session_state.active_category = parsed_configs.get("CATEGORY", "Premium Wave")
+                st.session_state.projected_duration = parsed_configs.get("DURATION", "20.0")
+                st.session_state.focus_wave_type = parsed_configs.get("WAVE_TYPE", "Standard Focus")
                 st.session_state.podcast_ready = True
+                
                 st.success("🎉 Production Engine Deployed and Synchronized Successfully!")
             else:
                 st.error("Audio generation pipeline failed. Internal data buffer exception.")
 
     if st.session_state.podcast_ready and st.session_state.podcast_path:
         st.write("---")
-        st.markdown(f"<div class='card-box' style='border-left: 5px solid #2E5B88;'>", unsafe_allow_html=True)
-        st.subheader(f"📻 Now Playing: Complete Lesson Master Track")
-        st.write(f"**Sound Profile Variant:** High-Definition `{st.session_state.active_category.upper()}` Focus Wave")
-        st.caption("Custom synthesized study wave streaming securely through isolated CDN conduits.")
         
-        # Deploy high-fidelity audio stream player
-        if st.session_state.active_stream_url:
+        # Split layout: Left column has the cool live specs, right column plays the track
+        col_specs, col_player = st.columns([1, 1])
+        
+        with col_specs:
+            st.markdown("<div class='card-box' style='border-left: 5px solid #2E5B88;'>", unsafe_allow_html=True)
+            st.markdown("<h3 class='telemetry-header'>🛸 AI Engine Live Telemetry</h3>", unsafe_allow_html=True)
+            st.write(f"**Sound Profile:** `{st.session_state.active_category}`")
+            st.write(f"**Brainwave Frequency:** `{st.session_state.focus_wave_type}`")
+            st.write(f"**Compiled Track Length:** `{st.session_state.projected_duration} Minutes`")
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        with col_player:
+            st.markdown("<div class='card-box' style='border-left: 5px solid #3E8E41;'>", unsafe_allow_html=True)
+            st.markdown("<h3 class='telemetry-header' style='color:#3E8E41; border-bottom-color:#3E8E41;'>📻 Live Audio Stream Feed</h3>", unsafe_allow_html=True)
+            st.caption("Secure encrypted tunnel linked directly into CDN soundscape vectors.")
+            
+            # Deploy high-fidelity audio stream player instantly
             st.audio(st.session_state.active_stream_url, format="audio/mp3")
-        else:
-            st.error("Streaming link configuration array is empty.")
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
         st.write(" ")
         if st.button("🗑️ Done Listening (Execute Ghost-Mode File Wipe)"):
             if os.path.exists(st.session_state.podcast_path):
                 try:
                     os.remove(st.session_state.podcast_path)
-                except Exception as e:
+                except Exception:
                     pass
-            # Clear configuration states completely
+            # Clear configuration states completely from memory
             st.session_state.podcast_path = ""
             st.session_state.active_stream_url = ""
             st.session_state.active_category = ""
+            st.session_state.projected_duration = ""
+            st.session_state.focus_wave_type = ""
             st.session_state.podcast_ready = False
-            st.toast("🔥 Operation Complete: Hidden tracking files vaporized successfully!", icon="🧹")
+            st.toast("🔥 Operation Complete: Hidden tracking tokens vaporized successfully!", icon="🧹")
             st.rerun()

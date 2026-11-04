@@ -3,7 +3,7 @@ import streamlit as st
 # 1. Page Setup & Style Customization
 st.set_page_config(page_title="Studley", page_icon="🃏", layout="centered")
 
-# Custom styling for text inputs and background matching your aesthetic
+# Custom styling matching your bright beige and gray aesthetic
 st.markdown(
     """
     <style>
@@ -56,40 +56,41 @@ if "card_index" not in st.session_state:
 if "show_answer" not in st.session_state:
     st.session_state.show_answer = False
 
-# --- SECTION 1: FILE UPLOADER FIRST ---
+# --- SECTION 1: MANDATORY FILE UPLOADER ---
 st.markdown("---")
 st.header("📤 Upload Study Material")
-st.write("Please drop your study notes or text files here to activate your workspace!")
+st.write("Drop your study notes or text files here to unlock your workspace!")
 
 uploaded_file = st.file_uploader("Choose a file", type=["txt", "md"])
 
-# 🛑 IF NO FILE IS UPLOADED, STOP HERE AND WAITING FOR THE USER
+# Lock screen if file is missing
 if uploaded_file is None:
     st.warning("🔒 Please upload a text file above to unlock your flashcards, quiz, and podcast audio.")
+    
+    with st.expander("💡 Quick Guide: How to format your text file"):
+        st.write("Create a text file where each line has a term and definition separated by a dash `-`. For example:")
+        st.code("What is the capital of Texas? - Austin\nWhat is 12 x 12? - 144", language="text")
     st.stop()
 
-# --- IF FILE IS UPLOADED, PROCEED WITH THE REST OF THE APP ---
-# Read the file contents as text strings
+# --- FILE PROCESSOR (UNLOCKED) ---
 file_contents = uploaded_file.read().decode("utf-8")
 st.success("📝 File uploaded successfully! Workspace unlocked.")
 
-# Base data list for flashcards
 flashcards_data = []
 
-# Simple automatic parser: if lines have a dash '-', turn them into custom cards!
+# Automatically parse lines containing a dash '-'
 lines = file_contents.split("\n")
 for line in lines:
     if "-" in line:
         parts = line.split("-", 1)
         flashcards_data.append({"front": parts[0].strip(), "back": parts[1].strip()})
 
-# Fallback if the file didn't have any dashes to generate cards
+# Fallback if no lines matched our formatting rule
 if not flashcards_data:
     flashcards_data = [
-        {"front": "No dash '-' found in file.", "back": "Make sure your text file has lines formatted like: Question - Answer"},
-        {"front": "Sample Question", "back": "Sample Answer"}
+        {"front": "No dash '-' found in your file.", "back": "Please edit your text file so questions and answers are split with a dash '-'!"}
     ]
-    with st.expander("👀 View Uploaded Notes Raw Text"):
+    with st.expander("👀 View Uploaded Raw Notes"):
         st.text(file_contents)
 else:
     st.info(f"✨ Automatically generated {len(flashcards_data)} custom flashcards from your file!")
@@ -98,13 +99,11 @@ else:
 st.markdown("---")
 st.header("📇 Flashcard Station")
 
-# Handle edge case if current index gets out of bounds of a newly uploaded shorter list
 if st.session_state.card_index >= len(flashcards_data):
     st.session_state.card_index = 0
 
 current_card = flashcards_data[st.session_state.card_index]
 
-# Display Card Content
 if not st.session_state.show_answer:
     display_text = f"💡 **Question / Term:**\n\n### {current_card['front']}"
 else:
@@ -112,7 +111,7 @@ else:
 
 st.markdown(f'<div class="flashcard-box">{display_text}</div>', unsafe_allow_html=True)
 
-# Card Action Buttons (Fixed layout parameters)
+# Layout buttons using exactly 3 columns
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -129,9 +128,8 @@ with col2:
 # --- SECTION 3: PODCAST QUIZ ---
 st.markdown("---")
 st.header("🎙️ Podcast Audio & Quiz")
-st.write("Listen to the audio clip below, then test your knowledge!")
+st.write("Listen to your lesson audio below, then test your knowledge!")
 
-# Audio Player (Using a sample online mp3 file)
 st.audio("https://soundhelix.com")
 
 st.subheader("📝 Quick Quiz Check")

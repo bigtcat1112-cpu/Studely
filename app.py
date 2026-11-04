@@ -163,19 +163,17 @@ with tab3:
     st.write("Initialize the high-fidelity cloud streaming blueprint down below to compile your lesson audio tracks.")
     
     if st.button("🚀 Initialize Goated Audio Production Engine", key="gen_podcast_btn"):
-        with st.spinner("Quantum Engine is compiling background tracks and analyzing data density inside server cache data channels..."):
+        with st.spinner("Quantum Engine is allocating temporary asset verification flags inside server memory data channels..."):
             token_file_path = generate_long_podcast(flashcards_data)
             
             if token_file_path and os.path.exists(token_file_path):
                 st.session_state.podcast_path = token_file_path
                 
-                # LOOPHOLE SELECTION: High-bandwidth stream sources with full direct extension headers
-                premium_vault = [
-                    {"category": "Lofi Study Beats (Ultra Edition)", "url": "https://soundhelix.com"},
-                    {"category": "Synthwave Focus Wave (High-Octane Track)", "url": "https://soundhelix.com"},
-                    {"category": "Ambient Spatial Sound (Deep Mind Space)", "url": "https://soundhelix.com"}
-                ]
-                selected_track = premium_vault[0] # Forces first ultra track to play instantly
+                # LOOPHOLE SELECTION: Direct direct high-fidelity file streaming path vectors
+                selected_track = {
+                    "category": "Lofi Study Beats (Ultra Edition)", 
+                    "url": "https://soundhelix.com"
+                }
                 
                 # Pass data vectors straight to the dashboard memory matrix
                 st.session_state.active_stream_url = selected_track["url"]
@@ -216,7 +214,7 @@ with tab3:
             st.components.v1.html(audio_html, height=60)
             st.markdown("</div>", unsafe_allow_html=True)
 
-               st.write(" ")
+        st.write(" ")
         if st.button("🗑️ Done Listening (Execute Ghost-Mode File Wipe)"):
             if os.path.exists(st.session_state.podcast_path):
                 try:

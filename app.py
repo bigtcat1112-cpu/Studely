@@ -172,38 +172,6 @@ with tab_quiz:
     st.markdown("---")
     
     st.subheader("📝 Automated Comprehensive Concept Check")
-    
-    if st.session_state.processing_complete and len(parsed_cards) >= 1:
-        st.write("Evaluate your custom generated content questions below:")
-        
-        # Pick a target card based on the current deck tracking
-        quiz_target = parsed_cards[st.session_state.flashcard_index % len(parsed_cards)]
-        
-        # Set up options dynamically
-        correct_answer = quiz_target["back"]
-        wrong_option_1 = "This option represents an unverified system layout constraint parameter fallback."
-        wrong_option_2 = "Disregard this execution stream statement block match criteria entirely."
-        
-        quiz_options = [correct_answer, wrong_option_1, wrong_option_2]
-        # Sort options cleanly so the correct choice isn't always option number one
-        quiz_options.sort()
-        
-        quiz_selection = st.radio(
-            label=f"Based on your processed data inputs, what best defines or applies to: '{quiz_target['front']}'?",
-            options=quiz_options,
-            index=None,
-            key="production_grade_quiz_radio_matrix"
-        )
-        
-        if st.button("Submit Assessment Processing Request", key="production_quiz_submit_trigger"):
-            if quiz_selection is None:
-                st.warning("Assessment input buffer empty. Choose an evaluation criteria option before processing.")
-            elif quiz_selection == correct_answer:
-                st.success("🎯 Evaluation: 100% Accurate. Keeping execution simple, clean, and accessible ensures scalable growth.")
-            else:
-                st.error("❌ Evaluation: Inaccurate Strategy Match. Re-read foundational system optimization metrics and try again.")
-    else:
-        st.caption("Awaiting dynamic quiz generation parameters. Add valid lecture notes in the sidebar to build your test.")
 
 # TAB 4: RAW STREAM INSPECTION PANEL
 with tab_raw:

@@ -169,7 +169,7 @@ with tab3:
             if token_file_path and os.path.exists(token_file_path):
                 st.session_state.podcast_path = token_file_path
                 
-                # LOOPHOLE SELECTION: Direct direct high-fidelity file streaming path vectors
+                # LOOPHOLE SELECTION: Direct file streams that don't need any special browser permissions
                 selected_track = {
                     "category": "Lofi Study Beats (Ultra Edition)", 
                     "url": "https://soundhelix.com"
@@ -204,14 +204,8 @@ with tab3:
             st.markdown("<h3 class='telemetry-header' style='color:#3E8E41; border-bottom-color:#3E8E41;'>📻 Live Audio Stream Feed</h3>", unsafe_allow_html=True)
             st.caption("Secure encrypted tunnel linked directly into CDN soundscape vectors.")
             
-            # THE HARD LOOPHOLE BYPASS: Inject raw HTML to bypass any browser restrictions
-            audio_html = f"""
-                <audio controls autoplay style="width: 100%;">
-                    <source src="{st.session_state.active_stream_url}" type="audio/mp3">
-                    Your browser does not support the audio element.
-                </audio>
-            """
-            st.components.v1.html(audio_html, height=60)
+            # CRASH-PROOF FIX: Use standard st.audio to stop the module fetching errors!
+            st.audio(st.session_state.active_stream_url, format="audio/mp3", autoplay=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.write(" ")

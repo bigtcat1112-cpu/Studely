@@ -216,7 +216,7 @@ with tab3:
             st.components.v1.html(audio_html, height=60)
             st.markdown("</div>", unsafe_allow_html=True)
 
-        st.write(" ")
+               st.write(" ")
         if st.button("🗑️ Done Listening (Execute Ghost-Mode File Wipe)"):
             if os.path.exists(st.session_state.podcast_path):
                 try:

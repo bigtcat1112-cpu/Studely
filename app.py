@@ -1,18 +1,4 @@
 import streamlit as st
-# Place this right under your title in app.py
-st.header("📤 Upload Study Material")
-st.write("Drop your study notes or text files here to load them into the workspace!")
-
-uploaded_file = st.file_uploader("Choose a file", type=["txt", "md"])
-
-if uploaded_file is not None:
-    # Read the file contents as text
-    file_contents = uploaded_file.read().decode("utf-8")
-    st.success("📝 File uploaded successfully! Ready to study.")
-    
-    # Optional: Display a small preview of what she uploaded
-    with st.expander("👀 Preview Uploaded Text"):
-        st.write(file_contents)
 
 # 1. Page Setup & Style Customization
 st.set_page_config(page_title="Studley", page_icon="🃏", layout="centered")
@@ -27,9 +13,11 @@ st.markdown(
     h1, h2, h3, p, label {
         color: #4A4A46 !important;
     }
-    div[data-baseweb="input"] {
+    div[data-baseweb="input"], div[data-testid="stFileUploader"] {
         background-color: #F5F3EF !important;
         border: 1px solid #D3CFC9 !important;
+        border-radius: 8px;
+        padding: 10px;
     }
     div[data-baseweb="input"] input {
         color: #4A4A46 !important;
@@ -67,31 +55,62 @@ if "card_index" not in st.session_state:
     st.session_state.card_index = 0
 if "show_answer" not in st.session_state:
     st.session_state.show_answer = False
-if "quiz_submitted" not in st.session_state:
-    st.session_state.quiz_submitted = False
 
-# Sample Data (Later we can link this to your Supabase tables!)
+# --- NEW SECTION: FILE UPLOADER ---
+st.markdown("---")
+st.header("📤 Upload Study Material")
+st.write("Drop your study notes or text files here to load them into the workspace!")
+
+uploaded_file = st.file_uploader("Choose a file", type=["txt", "md"])
+
+# Base data list for flashcards
 flashcards_data = [
     {"front": "What is the capital of Texas?", "back": "Austin"},
     {"front": "What does a beginner programmer build first?", "back": "A cool app like Studley!"},
     {"front": "What is 12 x 12?", "back": "144"}
 ]
 
-# --- SECTION 1: FLASHCARDS ---
+if uploaded_file is not None:
+    # Read the file contents as text strings
+    file_contents = uploaded_file.read().decode("utf-8")
+    st.success("📝 File uploaded successfully!")
+    
+    # Simple automatic parser: if lines have a dash '-', turn them into custom cards!
+    lines = file_contents.split("\n")
+    custom_cards = []
+    for line in lines:
+        if "-" in line:
+            parts = line.split("-", 1)
+            custom_cards.append({"front": parts[0].strip(), "back": parts[1].strip()})
+    
+    # If we successfully made cards from the file, use them instead of the sample data
+    if custom_cards:
+        flashcards_data = custom_cards
+        st.info(f"✨ Automatically generated {len(custom_cards)} custom flashcards from your file!")
+    else:
+        with st.expander("👀 View Uploaded Notes Preview"):
+            st.text(file_contents)
+
+# --- SECTION 2: FLASHCARDS ---
+st.markdown("---")
 st.header("📇 Flashcard Station")
+
+# Handle edge case if current index gets out of bounds of a newly uploaded shorter list
+if st.session_state.card_index >= len(flashcards_data):
+    st.session_state.card_index = 0
 
 current_card = flashcards_data[st.session_state.card_index]
 
 # Display Card Content
 if not st.session_state.show_answer:
-    display_text = f"💡 **Question:**\n\n### {current_card['front']}"
+    display_text = f"💡 **Question / Term:**\n\n### {current_card['front']}"
 else:
-    display_text = f"✅ **Answer:**\n\n### {current_card['back']}"
+    display_text = f"✅ **Answer / Definition:**\n\n### {current_card['back']}"
 
 st.markdown(f'<div class="flashcard-box">{display_text}</div>', unsafe_allow_html=True)
 
 # Card Action Buttons
-col1, col2, col3 = st.columns([1, 1, 1])
+col1, col2, _ = st.columns([1, 1, 2])
 
 with col1:
     if st.button("🔄 Flip Card"):
@@ -104,13 +123,12 @@ with col2:
         st.session_state.show_answer = False
         st.rerun()
 
-
-# --- SECTION 2: PODCAST QUIZ ---
+# --- SECTION 3: PODCAST QUIZ ---
 st.markdown("---")
 st.header("🎙️ Podcast Audio & Quiz")
 st.write("Listen to the audio clip below, then test your knowledge!")
 
-# Audio Player (You can plug in your Supabase audio file URL or an online file)
+# Audio Player (Using a sample online mp3 file)
 st.audio("https://soundhelix.com")
 
 st.subheader("📝 Quick Quiz Check")

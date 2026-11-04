@@ -25,7 +25,7 @@ st.markdown("""
         color: #4A4A4A;
     }
     </style>
-""", unsafe_allow_name_matching=True)
+""", unsafe_allow_html=True)
 
 st.title("🎓 Studley Learning Workspace")
 

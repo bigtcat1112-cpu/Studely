@@ -3,38 +3,6 @@ import os
 from podcast import generate_long_podcast
 from audio_factory import vaporize_target_audio_file
 
-# Initialize the lock status in session state if it doesn't exist
-if "app_locked" not in st.session_state:
-    st.session_state.app_locked = False
-
-# --- SECRET ADMIN COUPLING OR URL GATEWAY ---
-# You can unlock or lock the app by adding ?admin=lock or ?admin=unlock to your live website URL
-query_params = st.query_params
-
-if "admin" in query_params:
-    if query_params["admin"] == "lock":
-        st.session_state.app_locked = True
-    elif query_params["admin"] == "unlock":
-        st.session_state.app_locked = False
-
-# --- THE BLOCKING SCREEN ---
-# If the app is locked, freeze the whole screen and stop processing anything else
-if st.session_state.app_locked:
-    st.error("🛑 ACCESS DENIED")
-    st.title("You have been very bad.")
-    st.subheader("This application has been suspended by the administrator.")
-    st.info("Try being nice tomorrow! 💡")
-    
-    # Hidden unlock button inside an expander that only you know about
-    with st.expander("🔑 Admin Override"):
-        admin_password = st.text_input("Enter Admin Password", type="password", key="override_pwd")
-        if admin_password == "tristan123":  # Put your secret password here
-            st.session_state.app_locked = False
-            st.rerun()
-            
-    st.stop() # This forces Streamlit to stop drawing the rest of the app!
-st.set_page_config(page_title="Studley Premium Workspace", page_icon="🎓", layout="wide")
-
 st.markdown("""
     <style>
     .stApp { background-color: #F7F5F0; color: #3A3A3A; }

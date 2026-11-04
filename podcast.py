@@ -1,9 +1,8 @@
-import streamlit as dt
+import streamlit as st
 import time
 
 def generate_super_long_script(study_material):
-    """Generates an massive, detailed study script designed to last 20 minutes."""
-    # This prompt forces the AI to not skip details or summarize loosely
+    """Generates a massive, detailed study script designed to last 20 minutes."""
     prompt = f"""
     You are an expert, friendly private tutor hosting a comprehensive, deep-dive 20-minute audio study session.
     Your goal is to teach the student everything about the provided material in an engaging, high-energy, conversational style.
@@ -22,60 +21,37 @@ def generate_super_long_script(study_material):
     {study_material}
     """
     
-    # Placeholder for your specific AI generation text call (e.g., Supabase edge function or OpenAI)
-    # For now, we simulate a massive text script payload being generated
-    # Replace this with your actual llm text invocation if needed!
+    # Placeholder for a massive script text generation
     large_script = f"[Study Session Intro]\n\nWelcome to your 20-minute ultimate masterclass study block! Let's dive deep into our material: {study_material}...\n\n[Act 2 Detail]\n\nLet's unpack the first major rule here..."
-    
     return large_script
 
-def generate_stitched_audio(full_script):
-    """Splits the long script into safe chunks to prevent Axios 500 errors, then merges them."""
-    # Split script by paragraph blocks so the server generates it cleanly in chunks
+def generate_long_podcast(study_material):
+    """Splits the long script into safe chunks to prevent Axios 500 errors, then merges them into audio bytes."""
+    # Step 1: Generate the super long 20-minute text script
+    full_script = generate_super_long_script(study_material)
+    
+    # Step 2: Split script by paragraph blocks so the server generates it cleanly in chunks
     paragraphs = [p.strip() for p in full_script.split("\n\n") if p.strip()]
     
     combined_audio_bytes = b""
     
-    # Progress tracking in the UI
-    progress_bar = dt.progress(0)
-    status_text = dt.empty()
+    # Progress tracking inside the Streamlit tab
+    progress_bar = st.progress(0)
+    status_text = st.empty()
     
     for idx, paragraph in enumerate(paragraphs):
-        status_text.text(f"Generating audio segment {idx + 1} of {len(paragraphs)}...")
+        status_text.text(f"Generating audio segment {idx + 1} of {len(paragraphs)} (Building 20-minute session)...")
         
-        # --- CRITICAL: YOUR TTS TOOL GOES HERE ---
+        # --- CRITICAL: YOUR TTS TOOL CODE GOES HERE ---
         # Replace the line below with your actual text-to-speech function bytes 
-        # (For example: chunk_bytes = client.audio.speech.create(text=paragraph, ...).content)
-        time.sleep(0.5) # Simulating processing time safely
+        time.sleep(0.2)  # Safe processing delay
         chunk_bytes = b"FakeAudioBytesData" 
-        # -----------------------------------------
+        # ---------------------------------------------
         
         combined_audio_bytes += chunk_bytes
-        
-        # Update progress bar smoothly
         progress_bar.progress((idx + 1) / len(paragraphs))
         
     status_text.text("✨ 20-minute audio session generation complete!")
-    return combined_audio_bytes
-
-def render_podcast_tab(study_material):
-    """The main interface function to embed right into your Studley app tab structure."""
-    dt.subheader("🎧 Studley Audio Sessions")
-    dt.write("Generate custom, long-form 20-minute audio lectures directly from your study guides.")
     
-    if not study_material:
-        dt.info("Please upload or enter some study notes in the main workspace first!")
-        return
-
-    if dt.button("⚡ Generate 20-Minute Study Session", key="gen_podcast_btn"):
-        with dt.spinner("Formulating deep-dive study masterclass script..."):
-            # Step 1: Make a super long text script
-            full_script = generate_super_long_script(study_material)
-            
-        with dt.spinner("Processing high-quality audio segments (Preventing 500 Errors)..."):
-            # Step 2: Safely chunk-generate and stitch the raw audio bytes
-            audio_data = generate_stitched_audio(full_script)
-            
-        # Step 3: Present the final compiled player to your sister
-        dt.success("🎉 Your audio session is ready for listening!")
-        dt.audio(audio_data, format="audio/mp3")
+    # Return the combined audio bytes back to line 92 in app.py
+    return combined_audio_bytes

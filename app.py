@@ -56,7 +56,7 @@ if "card_index" not in st.session_state:
 if "show_answer" not in st.session_state:
     st.session_state.show_answer = False
 
-# --- NEW SECTION: FILE UPLOADER ---
+# --- SECTION 1: FILE UPLOADER ---
 st.markdown("---")
 st.header("📤 Upload Study Material")
 st.write("Drop your study notes or text files here to load them into the workspace!")
@@ -110,7 +110,7 @@ else:
 st.markdown(f'<div class="flashcard-box">{display_text}</div>', unsafe_allow_html=True)
 
 # Card Action Buttons
-col1, col2, _ = st.columns([1, 1, 2])
+col1, col2, _ = st.columns()
 
 with col1:
     if st.button("🔄 Flip Card"):
@@ -148,4 +148,4 @@ if st.button("Submit Answer"):
     elif quiz_choice is None:
         st.warning("Please select an answer choice first!")
     else:
-        st.error("❌ Not quite! Try listening again and think about what makes an empire app successful.")
+        st.error("❌ Not quite! Try listening again.")

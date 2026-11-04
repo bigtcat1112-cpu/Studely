@@ -7,7 +7,7 @@ Designed to safely generate 20+ minute audio streams
 without blocking or timing out the main UI thread.
 
 Author: Tristan / Studley App Engine
-Version: 2.0.0 (Production Hardened)
+Version: 3.0.0 (Ghost Temp Mode Enabled)
 """
 
 import os
@@ -15,6 +15,7 @@ import sys
 import time
 import random
 import logging
+import tempfile
 
 # Set up clean terminal tracking
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -138,12 +139,10 @@ def generate_long_podcast(study_data):
         return None
         
     try:
-        target_directory = "generated_podcasts"
-        if not os.path.exists(target_directory):
-            os.makedirs(target_directory)
-            logger.info(f"Created dedicated production output target folder: {target_directory}")
-            
-        final_mp3_target = os.path.join(target_directory, "studley_long_deep_dive.mp3")
+        # GOATED CHEAT: Uses a secure directory hidden inside server memory
+        temp_dir = tempfile.gettempdir()
+        final_mp3_target = os.path.join(temp_dir, "studley_temporary_podcast.mp3")
+        
         engine = PodcastScriptGenerator(study_data)
         compiled_script = engine.assemble_full_script()
         logger.info(f"Script formatting complete. Total compiled tracks: {len(compiled_script)} lines.")

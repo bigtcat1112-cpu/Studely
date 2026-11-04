@@ -132,22 +132,43 @@ with tab3:
     st.header("Automated Deep-Dive Podcast")
     st.write("Generate and listen to an extended, comprehensive audio breakdown of your notes.")
     
-    if st.button("🚀 Generate 20+ Minute Audio Experience", key="gen_podcast_btn"):
-        with st.spinner("Generating your deep-dive audio experience. This long-form compilation may take a few moments..."):
+    # Generation Button Triggers
+    if st.button("🚀 Generate Goated Audio Experience", key="gen_podcast_btn"):
+        with st.spinner("AI is rendering your audio into temporary server memory..."):
             # Call our separate module file logic
             audio_file_path = generate_long_podcast(flashcards_data)
             
             if audio_file_path and os.path.exists(audio_file_path):
                 st.session_state.podcast_path = audio_file_path
                 st.session_state.podcast_ready = True
-                st.success("🎉 Extended Audio Production Complete!")
+                st.success("🎉 Temporary Audio Production Complete!")
             else:
-                st.error("❌ Audio generation timed out or failed. Please check your backend audio parameters.")
+                st.error("❌ Audio generation failed. Make sure your dependencies are active.")
 
     # Render working audio player if generation is successful
     if st.session_state.podcast_ready and st.session_state.podcast_path:
         st.write("---")
         st.subheader("📻 Now Playing: Complete Lesson Overview")
-        with open(st.session_state.podcast_path, "rb") as audio_file:
-            audio_bytes = audio_file.read()
-            st.audio(audio_bytes, format="audio/mp3")
+        
+        # Read the file from hidden storage and load it directly to player
+        if os.path.exists(st.session_state.podcast_path):
+            with open(st.session_state.podcast_path, "rb") as audio_file:
+                audio_bytes = audio_file.read()
+                st.audio(audio_bytes, format="audio/mp3")
+        else:
+            st.error("The file has already been destroyed or cleaned up!")
+
+        # SELF-DESTRUCT GATE BUTTON
+        st.write(" ")
+        if st.button("🗑️ Done Listening (Wipe File From Memory)", key="delete_audio_btn"):
+            try:
+                if os.path.exists(st.session_state.podcast_path):
+                    os.remove(st.session_state.podcast_path) # Wipes file off server completely!
+                
+                # Reset Streamlit memory flags cleanly
+                st.session_state.podcast_path = ""
+                st.session_state.podcast_ready = False
+                st.toast("🔥 Target file wiped and deleted cleanly!", icon="🧹")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error executing cleanup sequence: {e}")

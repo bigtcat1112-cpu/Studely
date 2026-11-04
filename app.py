@@ -223,8 +223,7 @@ with tab_raw:
     
     st.text_area(
         "Read-Only Log Stream Dump",
-        "Read-Only Log Stream Dump",
-        value=st.session_state.raw_text_data if st.session_state.raw_text_data else "No text files or lecture documentation uploaded currently.",
+        value=str(st.session_state.raw_text_data) if st.session_state.raw_text_data else "No text files or lecture documentation uploaded currently.",
         height=400,
         disabled=True,
         key="read_only_logger_display"

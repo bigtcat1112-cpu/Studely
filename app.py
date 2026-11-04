@@ -41,8 +41,8 @@ if uploaded_file is None:
     st.info("👋 Welcome! Please upload a dash-separated text note file in the sidebar to get started.")
     st.stop()
 
-# Cache file content to prevent unnecessary re-reading on UI changes
-@st.cache_data
+# Parse content into structured items (assuming dash-separated formatting)
+flashcards_data = []
 def load_uploaded_data(file_obj):
     bytes_data = file_obj.read()
     return bytes_data.decode("utf-8")

@@ -1,4 +1,18 @@
 import streamlit as st
+# Place this right under your title in app.py
+st.header("📤 Upload Study Material")
+st.write("Drop your study notes or text files here to load them into the workspace!")
+
+uploaded_file = st.file_uploader("Choose a file", type=["txt", "md"])
+
+if uploaded_file is not None:
+    # Read the file contents as text
+    file_contents = uploaded_file.read().decode("utf-8")
+    st.success("📝 File uploaded successfully! Ready to study.")
+    
+    # Optional: Display a small preview of what she uploaded
+    with st.expander("👀 Preview Uploaded Text"):
+        st.write(file_contents)
 
 # 1. Page Setup & Style Customization
 st.set_page_config(page_title="Studley", page_icon="🃏", layout="centered")

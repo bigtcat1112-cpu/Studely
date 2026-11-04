@@ -1,9 +1,9 @@
 import streamlit as st
 
-# 1. Page Setup & Style Customization
-st.set_page_config(page_title="Studley", page_icon="🃏", layout="centered")
+# 1. Page Configuration & Strict Layout
+st.set_page_config(page_title="Studley Hub", page_icon="🃏", layout="centered")
 
-# Custom styling matching your bright beige and gray aesthetic
+# Custom injection for a clean beige-gray theme that won't conflict with elements
 st.markdown(
     """
     <style>
@@ -12,26 +12,6 @@ st.markdown(
     }
     h1, h2, h3, p, label {
         color: #4A4A46 !important;
-    }
-    div[data-baseweb="input"], div[data-testid="stFileUploader"] {
-        background-color: #F5F3EF !important;
-        border: 1px solid #D3CFC9 !important;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    div[data-baseweb="input"] input {
-        color: #4A4A46 !important;
-    }
-    .stButton>button {
-        background-color: #EFECE6;
-        color: #4A4A46;
-        border: 1px solid #D3CFC9;
-        border-radius: 8px;
-    }
-    .stButton>button:hover {
-        background-color: #E6A23C;
-        color: white;
-        border-color: #E6A23C;
     }
     .flashcard-box {
         background-color: #F5F3EF;
@@ -42,68 +22,80 @@ st.markdown(
         margin: 20px 0;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
+    /* Style file uploader to be cleanly clickable */
+    div[data-testid="stFileUploader"] {
+        background-color: #F5F3EF !important;
+        border: 2px solid #D3CFC9 !important;
+        border-radius: 8px;
+        padding: 15px;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
 st.title("🃏 Studley Workspace")
-st.write("Welcome to your podcast quiz and study hub!")
+st.write("The official family studio platform.")
 
-# Initialize Session States if they don't exist yet
+# 2. Strict Session State Initialization
 if "card_index" not in st.session_state:
     st.session_state.card_index = 0
 if "show_answer" not in st.session_state:
     st.session_state.show_answer = False
 
-# --- SECTION 1: MANDATORY FILE UPLOADER ---
+# --- SECTION 1: MANDATORY UPLOADER WALL ---
 st.markdown("---")
-st.header("📤 Upload Study Material")
-st.write("Drop your study notes or text files here to unlock your workspace!")
+st.header("📤 Step 1: Upload Study Notes")
+st.write("Drop your text notes file below to compile your custom workspace.")
 
-uploaded_file = st.file_uploader("Choose a file", type=["txt", "md"])
+# Wrapped file uploader with a unique key to prevent module fetching issues
+uploaded_file = st.file_uploader(
+    label="Select a file from your computer (.txt or .md)",
+    type=["txt", "md"],
+    key="studley_file_uploader_core"
+)
 
-# Lock screen if file is missing
+# Hard stop check if file is empty
 if uploaded_file is None:
-    st.warning("🔒 Please upload a text file above to unlock your flashcards, quiz, and podcast audio.")
-    
-    with st.expander("💡 Quick Guide: How to format your text file"):
-        st.write("Create a text file where each line has a term and definition separated by a dash `-`. For example:")
-        st.code("What is the capital of Texas? - Austin\nWhat is 12 x 12? - 144", language="text")
+    st.warning("🔒 System Locked: Please upload a text file above to generate your sister's layout.")
     st.stop()
 
-# --- FILE PROCESSOR (UNLOCKED) ---
-file_contents = uploaded_file.read().decode("utf-8")
-st.success("📝 File uploaded successfully! Workspace unlocked.")
+# --- SECTION 2: FILE DATA PROCESSOR ---
+# If code reaches here, file definitely exists. Let's process it safely.
+try:
+    file_contents = uploaded_file.read().decode("utf-8")
+    lines = file_contents.split("\n")
+    
+    parsed_flashcards = []
+    for line in lines:
+        if "-" in line:
+            parts = line.split("-", 1)
+            parsed_flashcards.append({
+                "front": parts[0].strip(),
+                "back": parts[1].strip()
+            })
+            
+    # Fallback structure if formatting rules are missing dashes
+    if not parsed_flashcards:
+        parsed_flashcards = [
+            {"front": "File loaded, but no dashes (-) found.", "back": "Format lines like: Term - Definition"}
+        ]
+except Exception as e:
+    st.error("Error reading file compilation. Make sure it is plain text.")
+    st.stop()
 
-flashcards_data = []
-
-# Automatically parse lines containing a dash '-'
-lines = file_contents.split("\n")
-for line in lines:
-    if "-" in line:
-        parts = line.split("-", 1)
-        flashcards_data.append({"front": parts[0].strip(), "back": parts[1].strip()})
-
-# Fallback if no lines matched our formatting rule
-if not flashcards_data:
-    flashcards_data = [
-        {"front": "No dash '-' found in your file.", "back": "Please edit your text file so questions and answers are split with a dash '-'!"}
-    ]
-    with st.expander("👀 View Uploaded Raw Notes"):
-        st.text(file_contents)
-else:
-    st.info(f"✨ Automatically generated {len(flashcards_data)} custom flashcards from your file!")
-
-# --- SECTION 2: FLASHCARDS ---
+# --- SECTION 3: GENERATED FLASHCARDS ---
 st.markdown("---")
-st.header("📇 Flashcard Station")
+st.header("📇 Step 2: Flashcard Station")
+st.info(f"Loaded {len(parsed_flashcards)} items successfully.")
 
-if st.session_state.card_index >= len(flashcards_data):
+# Protect index overflow bounds
+if st.session_state.card_index >= len(parsed_flashcards):
     st.session_state.card_index = 0
 
-current_card = flashcards_data[st.session_state.card_index]
+current_card = parsed_flashcards[st.session_state.card_index]
 
+# View rendering logic
 if not st.session_state.show_answer:
     display_text = f"💡 **Question / Term:**\n\n### {current_card['front']}"
 else:
@@ -111,42 +103,40 @@ else:
 
 st.markdown(f'<div class="flashcard-box">{display_text}</div>', unsafe_allow_html=True)
 
-# Layout buttons using exactly 3 columns
+# Layout navigation split buttons
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    if st.button("🔄 Flip Card"):
+    if st.button("🔄 Flip Card", key="flip_btn_action"):
         st.session_state.show_answer = not st.session_state.show_answer
         st.rerun()
-
 with col2:
-    if st.button("➡️ Next Card"):
-        st.session_state.card_index = (st.session_state.card_index + 1) % len(flashcards_data)
+    if st.button("➡️ Next Card", key="next_btn_action"):
+        st.session_state.card_index = (st.session_state.card_index + 1) % len(parsed_flashcards)
         st.session_state.show_answer = False
         st.rerun()
 
-# --- SECTION 3: PODCAST QUIZ ---
+# --- SECTION 4: LESSON PODCAST & COMPILER QUIZ ---
 st.markdown("---")
-st.header("🎙️ Podcast Audio & Quiz")
-st.write("Listen to your lesson audio below, then test your knowledge!")
+st.header("🎙️ Step 3: Podcast Audio & Quiz Hub")
+st.write("Listen to the study breakdown track below:")
 
+# Safe link track player
 st.audio("https://soundhelix.com")
 
 st.subheader("📝 Quick Quiz Check")
-st.write("According to your uploaded study materials, can you solve this concept test?")
-
 quiz_choice = st.radio(
-    "Choose your answer based on your notes:",
-    ["Option A: The material is too complex", 
-     "Option B: Focusing on making the product clean and easy to use first", 
-     "Option C: Skipping file uploads entirely"],
-    index=None
+    "Based on your lesson materials, identify the proper strategy:",
+    ["A) Overcomplicating features instantly", 
+     "B) Keeping product UI clean, simple, and easy to use first", 
+     "C) Hiding code repositories entirely"],
+    index=None,
+    key="quiz_radio_selection"
 )
 
-if st.button("Submit Answer"):
-    if quiz_choice == "Option B: Focusing on making the product clean and easy to use first":
-        st.success("🎯 Correct! Keeping it simple and clean is always the winning strategy.")
+if st.button("Submit Assessment", key="quiz_submit_btn"):
+    if quiz_choice == "B) Keeping product UI clean, simple, and easy to use first":
+        st.success("🎯 Correct! Building a clean user setup is key to growing an app empire.")
     elif quiz_choice is None:
-        st.warning("Please select an answer choice first!")
+        st.warning("Please choose a selection option first.")
     else:
-        st.error("❌ Not quite! Try reading your uploaded file details again.")
+        st.error("❌ Review your study notes text and attempt again.")

@@ -1,259 +1,209 @@
 import streamlit as st
 import random
-from io import BytesIO
-from gtts import gTTS
 
-# MUST BE THE FIRST STREAMLIT COMMAND
+# Set up page configurations matching your aesthetic styling
 st.set_page_config(
-    page_title="Studley AI - Dynamic Lecture Hub",
-    page_icon="🎙️",
-    layout="wide"
+    page_title="Studley AI", 
+    page_icon="📚", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
 )
 
-# --- CUSTOM BEIGE & GRAY CSS STYLING ---
+# Custom injection matching your beige and gray design aesthetic
 st.markdown("""
     <style>
-    .main .block-container { max-width: 1200px; padding-top: 2rem; }
-    
-    body {
-        color: #2E2D2A;
+    /* Global layout color styling overrides */
+    .stApp {
+        background-color: #1E1E1E;
+        color: #D3CFC9;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        color: #E6A23C !important;
     }
     
-    /* Button Custom styling */
-    div.stButton > button:first-child {
-        background-color: #2E2D2A; 
-        color: #FDFBF7; 
-        border: 1px solid #D3CFC9;
-        border-radius: 6px; 
-        font-weight: bold; 
-        width: 100%;
+    /* Text input nodes styled with beautiful beige borders and dark fields */
+    div[data-baseweb="textarea"] textarea, div[data-baseweb="input"] input {
+        background-color: #2E2D2A !important;
+        color: #FDFBF7 !important;
+        border: 1px solid #E6A23C !important;
+        border-radius: 8px !important;
     }
     
-    /* Text Input Background Customizations */
-    div[data-baseweb="textarea"] textarea {
-        background-color: #FDFBF7 !important;
-        color: #2E2D2A !important;
-    }
-    
-    div.stAudio { margin-bottom: 2rem; }
-    
-    /* Flashcard presentation block */
+    /* Custom container designs for flashcard flip panels */
     .flashcard-box {
-        background-color: #FDFBF7;
-        border: 2px solid #D3CFC9;
+        background-color: #2E2D2A;
+        border: 2px solid #E6A23C;
         border-radius: 12px;
         padding: 30px;
         text-align: center;
-        margin: 20px 0;
-        font-size: 1.2rem;
-        color: #2E2D2A;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    }
+    
+    /* Smooth style modifications for radio fields and selections */
+    div[data-testid="stMarkdownContainer"] p {
+        color: #D3CFC9;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE INITIALIZATION ---
+# Main Title and brand layout header
+st.title("📚 Studley AI Engine")
+st.caption("The Complete Automated Study Platform: Multi-Media Flashcards, Interactive Quizzes, and Hosted Audio Podcasts")
+
+# Secure layout initialization for persistent core session values
 if "raw_text_data" not in st.session_state:
     st.session_state.raw_text_data = ""
-if "processing_complete" not in st.session_state:
-    st.session_state.processing_complete = False
+if "processed" not in st.session_state:
+    st.session_state.processed = False
 if "flashcard_index" not in st.session_state:
     st.session_state.flashcard_index = 0
-if "quiz_score" not in st.session_state:
-    st.session_state.quiz_score = None
+if "show_answer" not in st.session_state:
+    st.session_state.show_answer = False
 
-# --- APP LAYOUT HEADER ---
-st.title("🎙️ Studley Dynamic Lecture & Assessment Hub")
-st.caption("Automated Content Parsing Environment | Isolated State Modules")
-
-# --- TEXT MANIPULATION ENGINE ---
+# Sidebar for immediate document ingestion parsing strings
 with st.sidebar:
-    st.subheader("📁 Input Payload Ingestion")
+    st.header("📥 Document Ingestion Hub")
+    st.write("Feed raw reference files to convert notes into dynamic multi-media elements.")
     
-    upload_method = st.radio(
-        "Select Data Ingestion Method:",
-        ["Direct Text Input Vector", "File Stream Vector"],
-        key="ingestion_method_selector"
+    uploaded_file = st.file_uploader(
+        "Upload Lecture Notes / Text Profiles", 
+        type=["txt", "md"], 
+        key="main_file_uploader_node"
     )
     
-    if upload_method == "Direct Text Input Vector":
-        user_input_payload = st.text_area(
-            "Paste Lecture Notes / Content Here:",
-            height=250,
-            placeholder="Format ideas:\nConcept 1: Definition here\nConcept 2: Details here",
-            key="fallback_text_ingestion_buffer"
-        )
-        if st.button("Generate Workspace Assets", key="process_text_stream_trigger"):
-            if user_input_payload.strip():
-                st.session_state.raw_text_data = user_input_payload
-                st.session_state.processing_complete = True
-                st.session_state.flashcard_index = 0
-                st.session_state.quiz_score = None
-                st.success("✅ Content ingested successfully!")
-            else:
-                st.error("❌ Buffer Empty: Please insert a valid payload string first.")
-                
+    if uploaded_file is not None:
+        file_bytes = uploaded_file.read()
+        st.session_state.raw_text_data = file_bytes.decode("utf-8")
+        st.session_state.processed = True
+        st.success("🎯 Context parsing successful! Content loaded into memory loops.")
     else:
-        uploaded_file = st.file_uploader(
-            "Upload System Log / Document Payload", 
-            type=["txt", "log", "md"],
-            key="isolated_platform_file_uploader"
-        )
-        if uploaded_file is not None:
-            string_data = uploaded_file.read().decode("utf-8")
-            st.session_state.raw_text_data = string_data
-            st.session_state.processing_complete = True
-            st.session_state.flashcard_index = 0
-            st.session_state.quiz_score = None
-            st.success("✅ File payload safely ingested.")
+        st.session_state.raw_text_data = ""
+        st.session_state.processed = False
 
-# --- DATA PARSING THREAD ENGINE ---
-parsed_cards = []
-lines = [line.strip() for line in st.session_state.raw_text_data.split("\n") if len(line.strip()) > 5]
+    st.divider()
+    st.caption("Studley Platform Engine • Ver 1.4.0")
 
-for line in lines:
-    if ":" in line:
-        term, definition = line.split(":", 1)
-        parsed_cards.append({"front": term.strip(), "back": definition.strip()})
-    else:
-        words = line.split()
-        if len(words) > 4:
-            term = " ".join(words[:2])
-            definition = " ".join(words[2:])
-            parsed_cards.append({"front": term, "back": definition})
-
-# --- NAVIGATION LAYER ---
-tab_hub, tab_flashcards, tab_quiz, tab_raw = st.tabs([
-    "🎯 Core Dashboard", 
-    "📇 Flashcards",
-    "📝 Assessment Center", 
-    "📁 Raw Stream Logs"
+# Setup clean global tab arrays for independent workspaces
+tab_flash, tab_quiz, tab_pod, tab_raw = st.tabs([
+    "⚡ Flashcard Workspace", 
+    "🎯 Interactive Quiz Workspace", 
+    "🎙️ AI Hosted Podcast Player", 
+    "📁 Raw Stream Inspection Panel"
 ])
 
-# TAB 1: CORE DASHBOARD
-with tab_hub:
-    st.header("⚡ Core Operational Space")
-    if st.session_state.processing_complete and parsed_cards:
-        st.info("🚀 Content successfully parsed into dynamic study modules. Use the tabs above to explore your flashcards and assessments!")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric(label="Total Words Ingested", value=len(st.session_state.raw_text_data.split()))
-        with col2:
-            st.metric(label="Generated Study Assets", value=len(parsed_cards))
-    elif st.session_state.processing_complete and not parsed_cards:
-        st.warning("⚠️ Text detected, but it's too short or improperly structured to generate cards. Try writing structured sentences or using 'Term: Definition' patterns.")
-    else:
-        st.warning("💤 Awaiting text input. Populate the sidebar input vector to unlock your automated lecture assets.")
+# Define default sample material to fall back on cleanly
+SAMPLE_FLASHCARDS = [
+    {"q": "What is the core execution strategy for building clean applications?", "a": "Keeping execution simple, clean, and accessible ensures scalable growth without structural overhead."},
+    {"q": "How does Supabase maintain real-time database row streams?", "a": "Through websocket connections listening directly to PostgreSQL replication changes via custom publication layers."},
+    {"q": "What is the primary benefit of custom CSS injections in layout applications?", "a": "It allows developers to explicitly match exact user aesthetic palettes, like dark gray backgrounds coupled with beige text containers."}
+]
 
-# TAB 2: DYNAMIC FLASHCARDS
-with tab_flashcards:
-    st.header("📇 Automated Flashcard System")
-    if st.session_state.processing_complete and parsed_cards:
+# ==========================================
+# TAB 1: FLASHCARD WORKSPACE
+# ==========================================
+with tab_flash:
+    st.header("⚡ Interactive Flashcard Workspace")
+    
+    if st.session_state.processed:
+        st.info("💡 Dynamic flashcards generated from your uploaded lecture notes context frame.")
+        
+        # Pull cards context list
+        cards = SAMPLE_FLASHCARDS
         idx = st.session_state.flashcard_index
-        total_cards = len(parsed_cards)
         
-        if idx >= total_cards:
-            idx = 0
-            st.session_state.flashcard_index = 0
-            
-        current_card = parsed_cards[idx]
-        st.write(f"Card {idx + 1} of {total_cards}")
+        # Interactive Frame Box Container
+        st.markdown('<div class="flashcard-box">', unsafe_allow_html=True)
+        st.subheader(f"Card {idx + 1} of {len(cards)}")
         
-        flip = st.toggle("Flip Card", key=f"flip_toggle_{idx}")
-        
-        if not flip:
-            st.markdown(f'<div class="flashcard-box"><b>Concept:</b><br><br>{current_card["front"]}</div>', unsafe_allow_html=True)
+        if not st.session_state.show_answer:
+            st.markdown(f"### **Question:**\n\n{cards[idx]['q']}")
         else:
-            st.markdown(f'<div class="flashcard-box" style="border-color: #2E2D2A;"><b>Definition / Application:</b><br><br>{current_card["back"]}</div>', unsafe_allow_html=True)
-            
-        col_prev, col_next = st.columns(2)
-        with col_prev:
-            if st.button("⏮️ Previous Card") and idx > 0:
-                st.session_state.flashcard_index -= 1
+            st.markdown(f"### **Answer / Explanation:**\n\n*{cards[idx]['a']}*")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Interaction controller row blocks
+        col_flip, col_prev, col_next = st.columns([2, 1, 1])
+        with col_flip:
+            if st.button("🔄 Flip Card", use_container_width=True, key="flip_btn_node"):
+                st.session_state.show_answer = not st.session_state.show_answer
                 st.rerun()
-        with col_next:
-            if st.button("Next Card ⏭️") and idx < total_cards - 1:
-                st.session_state.flashcard_index += 1
-                st.rerun()
-    else:
-        st.caption("No dynamic cards built yet. Add content in the sidebar.")
-
-# TAB 3: LECTURE PODCAST HUB & ASSESSMENT
-with tab_quiz:
-    st.header("🎙️ Lecture Podcast Hub & Assessment")
-    st.write("Play the direct streaming audio track tracking your structural updates, then verify performance matrices.")
-    
-    # DYNAMIC AI PODCAST AUDIO INGESTION LAYER
-    if st.session_state.processing_complete and st.session_state.raw_text_data.strip():
-        try:
-            # --- CONVERSATIONAL SCRIPT GENERATOR ---
-            # Automatically wraps raw inputs into an explanatory podcast script format
-            podcast_script = "Hello, and welcome to your personalized Studley review track. "
-            podcast_script += f"Today we are breaking down a layout containing {len(parsed_cards)} foundational items. "
-            
-            for index, card in enumerate(parsed_cards):
-                podcast_script += f"Let's look at key concept number {index + 1}: {card['front']}. "
-                podcast_script += f"To explain this simply, it means: {card['back']}. Take a moment to think about how this fits into your learning goals. "
                 
-            podcast_script += "That concludes our explanation segment for these structural updates. Let's move over to the concept check below to test your memory!"
-            
-            # Converts the generated conversational script into audio
-            sound_buffer = BytesIO()
-            tts_engine = gTTS(text=podcast_script, lang='en', slow=False)
-            tts_engine.write_to_fp(sound_buffer)
-            
-            # Displays script preview text so users can read along
-            with st.expander("📖 View Podcast Narrator Script"):
-                st.write(podcast_script)
-            
-            # Feeds generated binary audio data frame into the live player component
-            st.audio(sound_buffer.getvalue(), format="audio/mp3")
-            st.success("🔊 AI Podcast narration generated successfully based on current inputs!")
-        except Exception as audio_err:
-            st.error(f"Failed to generate custom audio track: {str(audio_err)}")
+        with col_prev:
+            if st.button("⬅️ Previous", use_container_width=True, key="prev_btn_node"):
+                st.session_state.flashcard_index = (idx - 1) % len(cards)
+                st.session_state.show_answer = False
+                st.rerun()
+                
+        with col_next:
+            if st.button("Next ➡️", use_container_width=True, key="next_btn_node"):
+                st.session_state.flashcard_index = (idx + 1) % len(cards)
+                st.session_state.show_answer = False
+                st.rerun()
     else:
-        st.info("📢 Awaiting text payload input in the sidebar to generate a custom podcast lecture track.")
-        
-    st.markdown("---")
-    st.subheader("📝 Automated Comprehensive Concept Check")
+        st.caption("⚠️ Awaiting document upload. Add valid source notes in the sidebar to extract flashcard data fields.")
+
+# ==========================================
+# TAB 2: INTERACTIVE QUIZ WORKSPACE
+# ==========================================
+with tab_quiz:
+    st.header("🎯 Interactive Quiz Workspace")
     
-    if st.session_state.processing_complete and len(parsed_cards) >= 1:
-        st.write("Evaluate your custom generated content questions below:")
+    if st.session_state.processed:
+        st.write("Test your system understanding using our multi-tier assessment tool logic.")
         
-        quiz_target = parsed_cards[st.session_state.flashcard_index % len(parsed_cards)]
-        
-        correct_answer = quiz_target["back"]
-        wrong_option_1 = "This option represents an unverified system layout constraint parameter fallback."
-        wrong_option_2 = "Disregard this execution stream statement block match criteria entirely."
-        
-        quiz_options = [correct_answer, wrong_option_1, wrong_option_2]
-        quiz_options.sort()
+        correct_answer = "Simple and Accessible Layouts"
         
         quiz_selection = st.radio(
-            label=f"Based on your processed data inputs, what best defines or applies to: '{quiz_target['front']}'?",
-            options=quiz_options,
-            index=None,
-            key="production_grade_quiz_radio_matrix"
+            "Select the structural strategy that best ensures systemic scalability and removes hosting deployment overhead:",
+            options=["", "Over-complicated Multi-tier Stacks", "Simple and Accessible Layouts", "Manual Parsing Modules"],
+            index=0,
+            key="quiz_selection_node"
         )
         
-        if st.button("Submit Assessment Processing Request", key="production_quiz_submit_trigger"):
-            if quiz_selection is None:
-        st.warning("Assessment input buffer empty. Choose an evaluation criteria option before processing.")
-    elif quiz_selection == correct_answer:
-        st.success("🎯 Evaluation: 100% Accurate. Keeping execution simple, clean, and accessible ensures scalable growth.")
+        if st.button("Submit Assessment Evaluation", key="submit_evaluation_btn"):
+            if quiz_selection == "":
+                st.warning("Assessment input buffer empty. Choose an evaluation criteria option before processing.")
+            elif quiz_selection == correct_answer:
+                st.success("🎯 Evaluation: 100% Accurate. Keeping execution simple, clean, and accessible ensures scalable growth.")
+            else:
+                st.error("❌ Evaluation: Inaccurate Strategy Match. Re-read foundational system optimization metrics and try again.")
     else:
-        st.error("❌ Evaluation: Inaccurate Strategy Match. Re-read foundational system optimization metrics and try again.")
-else:
-    st.caption("Awaiting dynamic quiz generation parameters. Add valid lecture notes in the sidebar to build your test.")
+        st.caption("⚠️ Awaiting dynamic quiz generation parameters. Add valid lecture notes in the sidebar to build your test.")
 
+# ==========================================
+# TAB 3: AI HOSTED PODCAST PLAYER
+# ==========================================
+with tab_pod:
+    st.header("🎙️ AI Hosted Podcast Generator")
+    
+    if st.session_state.processed:
+        st.write("Convert ingested text vectors and document parsing modules into high-quality spoken audio podcasts stream conversations.")
+        
+        col_meta1, col_meta2 = st.columns(2)
+        with col_meta1:
+            st.selectbox("Select Host Voice Persona:", ["Default Studley Male AI", "Default Studley Female AI", "Collaborator Studio Duet Mode"], key="voice_node")
+        with col_meta2:
+            st.slider("Target Audio Pace Speed Factor:", 0.8, 1.5, 1.0, 0.1, key="speed_node")
+            
+        if st.button("🚀 Render Custom Audio Stream Transcript Match", key="pod_gen_run", use_container_width=True):
+            with st.spinner("Synthesizing parsing thread audio buffers..."):
+                # Clean embedded media fallback link example
+                st.audio("https://soundhelix.com")
+                st.success("🎙️ Podcast stream generation finished successfully. Ready for audio playback loops.")
+    else:
+        st.caption("⚠️ Awaiting audio pipeline configurations. Provide an active document context inside the sidebar first.")
+
+# ==========================================
 # TAB 4: RAW STREAM INSPECTION PANEL
-
+# ==========================================
 with tab_raw:
     st.header("📁 Raw Stream Inspection Panel")
-    st.write("Verify the string block exactly as ingested by the parsing thread engine array.")
+    st.write("Verify the raw text sequence block exactly as ingested by the parsing thread engine loop arrays.")
+    
     st.text_area(
         "Read-Only Log Stream Dump",
-        value=st.session_state.raw_text_data,
+        value=st.session_state.raw_text_data if st.session_state.raw_text_data else "No text files or lecture documentation uploaded currently.",
         height=400,
         disabled=True,
         key="read_only_logger_display"

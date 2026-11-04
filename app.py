@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from podcast import generate_long_podcast
+from podcast import render_podcast_tab
 from audio_factory import vaporize_target_audio_file
 
 st.set_page_config(page_title="Studley Premium Workspace", page_icon="🎓", layout="wide")

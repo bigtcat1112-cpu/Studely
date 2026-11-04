@@ -169,10 +169,10 @@ with tab3:
             if token_file_path and os.path.exists(token_file_path):
                 st.session_state.podcast_path = token_file_path
                 
-                # LOOPHOLE SELECTION: Direct file streams that don't need any special browser permissions
+                              # LOOPHOLE SELECTION: Secure, high-speed direct file link
                 selected_track = {
                     "category": "Lofi Study Beats (Ultra Edition)", 
-                    "url": "https://soundhelix.com"
+                    "url": "https://archive.org"
                 }
                 
                 # Pass data vectors straight to the dashboard memory matrix

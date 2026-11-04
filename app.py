@@ -1,5 +1,7 @@
 import streamlit as st
 import random
+from io import BytesIO
+from gtts import gTTS
 
 # MUST BE THE FIRST STREAMLIT COMMAND
 st.set_page_config(
@@ -8,24 +10,44 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM CSS STYLING ---
+# --- CUSTOM BEIGE & GRAY CSS STYLING ---
 st.markdown("""
     <style>
     .main .block-container { max-width: 1200px; padding-top: 2rem; }
-    div.stButton > button:first-child {
-        background-color: #FF4B4B; color: white; border-radius: 6px; font-weight: bold; width: 100%;
+    
+    body {
+        color: #2E2D2A;
     }
+    
+    /* Button Custom styling */
+    div.stButton > button:first-child {
+        background-color: #2E2D2A; 
+        color: #FDFBF7; 
+        border: 1px solid #D3CFC9;
+        border-radius: 6px; 
+        font-weight: bold; 
+        width: 100%;
+    }
+    
+    /* Text Input Background Customizations */
+    div[data-baseweb="textarea"] textarea {
+        background-color: #FDFBF7 !important;
+        color: #2E2D2A !important;
+    }
+    
     div.stAudio { margin-bottom: 2rem; }
+    
+    /* Flashcard presentation block */
     .flashcard-box {
-        background-color: #f7f5f0;
-        border: 2px solid #d3cfc9;
+        background-color: #FDFBF7;
+        border: 2px solid #D3CFC9;
         border-radius: 12px;
         padding: 30px;
         text-align: center;
         margin: 20px 0;
         font-size: 1.2rem;
-        color: #2e2d2a;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #2E2D2A;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -142,7 +164,7 @@ with tab_flashcards:
         if not flip:
             st.markdown(f'<div class="flashcard-box"><b>Concept:</b><br><br>{current_card["front"]}</div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div class="flashcard-box" style="border-color: #FF4B4B;"><b>Definition / Application:</b><br><br>{current_card["back"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="flashcard-box" style="border-color: #2E2D2A;"><b>Definition / Application:</b><br><br>{current_card["back"]}</div>', unsafe_allow_html=True)
             
         col_prev, col_next = st.columns(2)
         with col_prev:
@@ -161,10 +183,38 @@ with tab_quiz:
     st.header("🎙️ Lecture Podcast Hub & Assessment")
     st.write("Play the direct streaming audio track tracking your structural updates, then verify performance matrices.")
     
-    # Audio Player Execution Layer (Points directly to a live, valid MP3 streaming file)
-    st.audio("https://soundhelix.com")
+    # DYNAMIC AI PODCAST AUDIO INGESTION LAYER
+    if st.session_state.processing_complete and st.session_state.raw_text_data.strip():
+        try:
+            # --- CONVERSATIONAL SCRIPT GENERATOR ---
+            # Automatically wraps raw inputs into an explanatory podcast script format
+            podcast_script = "Hello, and welcome to your personalized Studley review track. "
+            podcast_script += f"Today we are breaking down a layout containing {len(parsed_cards)} foundational items. "
+            
+            for index, card in enumerate(parsed_cards):
+                podcast_script += f"Let's look at key concept number {index + 1}: {card['front']}. "
+                podcast_script += f"To explain this simply, it means: {card['back']}. Take a moment to think about how this fits into your learning goals. "
+                
+            podcast_script += "That concludes our explanation segment for these structural updates. Let's move over to the concept check below to test your memory!"
+            
+            # Converts the generated conversational script into audio
+            sound_buffer = BytesIO()
+            tts_engine = gTTS(text=podcast_script, lang='en', slow=False)
+            tts_engine.write_to_fp(sound_buffer)
+            
+            # Displays script preview text so users can read along
+            with st.expander("📖 View Podcast Narrator Script"):
+                st.write(podcast_script)
+            
+            # Feeds generated binary audio data frame into the live player component
+            st.audio(sound_buffer.getvalue(), format="audio/mp3")
+            st.success("🔊 AI Podcast narration generated successfully based on current inputs!")
+        except Exception as audio_err:
+            st.error(f"Failed to generate custom audio track: {str(audio_err)}")
+    else:
+        st.info("📢 Awaiting text payload input in the sidebar to generate a custom podcast lecture track.")
+        
     st.markdown("---")
-    
     st.subheader("📝 Automated Comprehensive Concept Check")
     
     if st.session_state.processing_complete and len(parsed_cards) >= 1:
@@ -188,22 +238,23 @@ with tab_quiz:
         
         if st.button("Submit Assessment Processing Request", key="production_quiz_submit_trigger"):
             if quiz_selection is None:
-                st.warning("Assessment input buffer empty. Choose an evaluation criteria option before processing.")
-            elif quiz_selection == correct_answer:
-                st.success("🎯 Evaluation: 100% Accurate. Keeping execution simple, clean, and accessible ensures scalable growth.")
-            else:
-                st.error("❌ Evaluation: Inaccurate Strategy Match. Re-read foundational system optimization metrics and try again.")
+        st.warning("Assessment input buffer empty. Choose an evaluation criteria option before processing.")
+    elif quiz_selection == correct_answer:
+        st.success("🎯 Evaluation: 100% Accurate. Keeping execution simple, clean, and accessible ensures scalable growth.")
     else:
-        st.caption("Awaiting dynamic quiz generation parameters. Add valid lecture notes in the sidebar to build your test.")
+        st.error("❌ Evaluation: Inaccurate Strategy Match. Re-read foundational system optimization metrics and try again.")
+else:
+    st.caption("Awaiting dynamic quiz generation parameters. Add valid lecture notes in the sidebar to build your test.")
 
 # TAB 4: RAW STREAM INSPECTION PANEL
+
 with tab_raw:
     st.header("📁 Raw Stream Inspection Panel")
     st.write("Verify the string block exactly as ingested by the parsing thread engine array.")
     st.text_area(
-        "Read-Only Log Stream Dump", 
-        value=st.session_state.raw_text_data, 
-        height=400, 
+        "Read-Only Log Stream Dump",
+        value=st.session_state.raw_text_data,
+        height=400,
         disabled=True,
         key="read_only_logger_display"
     )

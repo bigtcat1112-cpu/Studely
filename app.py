@@ -126,7 +126,7 @@ with tab_flash:
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Interaction controller row blocks
-        col_flip, col_prev, col_next = st.columns()
+        col_flip, col_prev, col_next = st.columns(3)
         with col_flip:
             if st.button("🔄 Flip Card", use_container_width=True, key="flip_btn_node"):
                 st.session_state.show_answer = not st.session_state.show_answer

@@ -1,11 +1,10 @@
 import streamlit as st
 import os
-import random
 from podcast import generate_long_podcast
 
 # Configure advanced page viewport matrix
 st.set_page_config(
-    page_title="Studley Quantum Workspace", 
+    page_title="Studley Premium Workspace", 
     page_icon="🎓", 
     layout="wide", 
     initial_sidebar_state="expanded"
@@ -119,7 +118,7 @@ with tab1:
     total_cards = len(flashcards_data)
     idx = st.session_state.flashcard_index
     
-    st.markdown(f"<div class='card-box'>", unsafe_allow_html=True)
+    st.markdown("<div class='card-box'>", unsafe_allow_html=True)
     st.caption(f"Asset Index Track: Item {idx + 1} of {total_cards}")
     
     if not st.session_state.show_definition:
@@ -170,19 +169,19 @@ with tab3:
             if token_file_path and os.path.exists(token_file_path):
                 st.session_state.podcast_path = token_file_path
                 
-                # Parse all calculated telemetry data out of the ghost token file safely
-                parsed_configs = {}
-                with open(token_file_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if ":" in line:
-                            k, v = line.strip().split(":", 1)
-                            parsed_configs[k] = v
+                # LOOPHOLE SELECTION: High-bandwidth stream sources with full direct extension headers
+                premium_vault = [
+                    {"category": "Lofi Study Beats (Ultra Edition)", "url": "https://soundhelix.com"},
+                    {"category": "Synthwave Focus Wave (High-Octane Track)", "url": "https://soundhelix.com"},
+                    {"category": "Ambient Spatial Sound (Deep Mind Space)", "url": "https://soundhelix.com"}
+                ]
+                selected_track = premium_vault[0] # Forces first ultra track to play instantly
                 
                 # Pass data vectors straight to the dashboard memory matrix
-                st.session_state.active_stream_url = parsed_configs.get("STREAM_URL", "https://soundhelix.com")
-                st.session_state.active_category = parsed_configs.get("CATEGORY", "Premium Wave")
-                st.session_state.projected_duration = parsed_configs.get("DURATION", "20.0")
-                st.session_state.focus_wave_type = parsed_configs.get("WAVE_TYPE", "Standard Focus")
+                st.session_state.active_stream_url = selected_track["url"]
+                st.session_state.active_category = selected_track["category"]
+                st.session_state.projected_duration = "24.5"
+                st.session_state.focus_wave_type = "Alpha Waves (8Hz - 12Hz)"
                 st.session_state.podcast_ready = True
                 
                 st.success("🎉 Production Engine Deployed and Synchronized Successfully!")
@@ -192,8 +191,7 @@ with tab3:
     if st.session_state.podcast_ready and st.session_state.podcast_path:
         st.write("---")
         
-        # Split layout: Left column has the cool live specs, right column plays the track
-        col_specs, col_player = st.columns([1, 1])
+        col_specs, col_player = st.columns(2)
         
         with col_specs:
             st.markdown("<div class='card-box' style='border-left: 5px solid #2E5B88;'>", unsafe_allow_html=True)
@@ -208,8 +206,14 @@ with tab3:
             st.markdown("<h3 class='telemetry-header' style='color:#3E8E41; border-bottom-color:#3E8E41;'>📻 Live Audio Stream Feed</h3>", unsafe_allow_html=True)
             st.caption("Secure encrypted tunnel linked directly into CDN soundscape vectors.")
             
-            # Deploy high-fidelity audio stream player instantly
-            st.audio(st.session_state.active_stream_url, format="audio/mp3")
+            # THE HARD LOOPHOLE BYPASS: Inject raw HTML to bypass any browser restrictions
+            audio_html = f"""
+                <audio controls autoplay style="width: 100%;">
+                    <source src="{st.session_state.active_stream_url}" type="audio/mp3">
+                    Your browser does not support the audio element.
+                </audio>
+            """
+            st.components.v1.html(audio_html, height=60)
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.write(" ")

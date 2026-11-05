@@ -9,7 +9,7 @@ st.markdown("""
     <style>
     /* Dark beige/grey text color across the app */
     html, body, [data-testid="stWidgetLabel"], .stMarkdown {
-        color: #2E2D2A !0important;
+        color: #2E2D2A !important;
     }
     /* Customize text inputs to have a bright beige styling */
     div[data-testid="stTextInput"] > div > div > input {

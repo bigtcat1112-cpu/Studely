@@ -2,7 +2,7 @@ import streamlit as st
 import io
 from pypdf import PdfReader
 from PIL import Image
-import easyocr
+import pytesseract
 import numpy as np
 
 # Page Initializations
@@ -86,20 +86,12 @@ def extract_text_from_pdf(file_bytes):
         st.error(f"Error parsing PDF file: {e}")
         return None
 
-@st.cache_resource
-def load_ocr_reader():
-    """Cache the EasyOCR reader so it loads quickly once instead of on every run."""
-    return easyocr.Reader(['en'], gpu=False)
-
 def extract_text_from_image(file_bytes):
     try:
         image = Image.open(io.BytesIO(file_bytes))
-        # Convert image to numpy array format for EasyOCR
-        image_np = np.array(image)
-        reader = load_ocr_reader()
         with st.spinner("Analyzing handwriting/text in image..."):
-            result = reader.readtext(image_np, detail=0)
-        return "\n".join(result).strip()
+            result = pytesseract.image_to_string(image)
+        return result.strip()
     except Exception as e:
         st.error(f"Error reading text from photo: {e}")
         return None

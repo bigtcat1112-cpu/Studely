@@ -1,8 +1,11 @@
 import streamlit as st
 import io
 from pypdf import PdfReader
+from PIL import Image
+import easyocr
+import numpy as np
 
-# 1. Page Configuration & Theme Initialization
+# Page Initializations
 st.set_page_config(
     page_title="Studley Hub",
     page_icon="🎙️",
@@ -10,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom beige and bright gray styling variables on our dark developer theme
+# Custom Master App Theme Overrides
 st.markdown(
     """
     <style>
@@ -67,11 +70,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Import podcast processing structures directly 
 from podcast import render_podcast_app
 
 def extract_text_from_pdf(file_bytes):
-    """Helper function to read binary PDF content and merge page text streams."""
     try:
         pdf_file = io.BytesIO(file_bytes)
         reader = PdfReader(pdf_file)
@@ -85,12 +86,28 @@ def extract_text_from_pdf(file_bytes):
         st.error(f"Error parsing PDF file: {e}")
         return None
 
-# 2. Main Platform Pipeline Control
+@st.cache_resource
+def load_ocr_reader():
+    """Cache the EasyOCR reader so it loads quickly once instead of on every run."""
+    return easyocr.Reader(['en'], gpu=False)
+
+def extract_text_from_image(file_bytes):
+    try:
+        image = Image.open(io.BytesIO(file_bytes))
+        # Convert image to numpy array format for EasyOCR
+        image_np = np.array(image)
+        reader = load_ocr_reader()
+        with st.spinner("Analyzing handwriting/text in image..."):
+            result = reader.readtext(image_np, detail=0)
+        return "\n".join(result).strip()
+    except Exception as e:
+        st.error(f"Error reading text from photo: {e}")
+        return None
+
 def main():
     st.title("⚡ Studley Workspace Platform")
     st.subheader("Isolated Multi-Component Interactive Workspace")
 
-    # Hard-Stop File Uploader Gate Core Requirement
     if "workspace_file_content" not in st.session_state:
         st.session_state.workspace_file_content = None
 
@@ -98,15 +115,14 @@ def main():
         st.markdown(
             '<div class="gate-container">'
             '<h3>⚠️ System Restricted Access Gate</h3>'
-            '<p>Please upload your primary core study script file (.txt or .pdf) below to unlock your personalized dashboard, quiz modules, and podcast mixers.</p>'
+            '<p>Please upload your study notes (.txt, .pdf) or a picture (.jpg, .png) below to unlock your dashboard modules.</p>'
             '</div>', 
             unsafe_allow_html=True
         )
         
-        # Added "pdf" to type list to fulfill our multi-format processing constraint
         uploaded_gate_file = st.file_uploader(
-            "Upload Master Study Guide Content:",
-            type=["txt", "pdf"],
+            "Upload Master Study Guide Content or Photo Note:",
+            type=["txt", "pdf", "jpg", "jpeg", "png"],
             key="studley_master_gate_uploader"
         )
         
@@ -120,35 +136,35 @@ def main():
                     if parsed_text:
                         st.session_state.workspace_file_content = parsed_text
                         st.rerun()
+            elif file_extension in ["jpg", "jpeg", "png"]:
+                parsed_text = extract_text_from_image(raw_bytes)
+                if parsed_text:
+                    st.session_state.workspace_file_content = parsed_text
+                    st.rerun()
             else:
-                # Handle basic plain text files safely
                 st.session_state.workspace_file_content = raw_bytes.decode("utf-8")
                 st.rerun()
         return
 
-    # Clear Workspace Action Link
     if st.sidebar.button("🔒 Reset & Lock Workspace Container", key="reset_workspace_btn"):
         st.session_state.workspace_file_content = None
-        st.session_state.podcast_script = None
-        st.session_state.generated_audio_data = None
+        st.session_state.custom_podcast_script = None
+        st.session_state.custom_audio_data = None
         st.rerun()
 
     st.sidebar.success("✅ Master Study Guide successfully parsed.")
     with st.sidebar.expander("Review Raw Parsed Context Data"):
         st.text_area("File Content Draft Preview:", value=st.session_state.workspace_file_content, height=200, disabled=True)
 
-    # 3. Dynamic Application Segment Tabs Layout
     tab_podcast, tab_quiz, tab_flashcards = st.tabs([
         "🎙️ Broadcast Podcast Hub", 
         "📝 Automated Quiz Desk", 
         "🗂️ Master Flashcards System"
     ])
 
-    # --- SEGMENT 1: PODCAST HUB ROUTER ---
     with tab_podcast:
         render_podcast_app()
 
-    # --- SEGMENT 2: AUTOMATED QUIZ DESK ---
     with tab_quiz:
         st.header("📝 Automated Study Review Quiz")
         st.write("Test your knowledge against structural details pulled directly from your master document file.")
@@ -169,7 +185,6 @@ def main():
             st.balloons()
             st.success(f"Assessment processed successfully! Evaluation Matrix Result Score: {score} / {len(questions)}")
 
-    # --- SEGMENT 3: FLASHCARDS ROUTER ---
     with tab_flashcards:
         st.header("🗂️ Active Recall Flashcards Deck")
         st.write("Flip through memory milestones compiled straight from your workspace assets.")

@@ -1,8 +1,7 @@
 import streamlit as st
 import io
 
-# 1. Bypassing custom HTML completely to avoid all parameter typos and stuck caches
-# We will use Streamlit's built-in header styles instead
+# Satisfy the import requirement for app.py
 def generate_long_podcast():
     """Placeholder function to satisfy the import in app.py"""
     pass
@@ -10,20 +9,19 @@ def generate_long_podcast():
 st.title("🎙️ Studley Podcast & Study Hub")
 st.write("Upload files, generate flashcards, and take your custom quiz.")
 
-# Initialize session states for storing processed content safely
+# Initialize session states safely
 if "quiz_ready" not in st.session_state:
     st.session_state.quiz_ready = False
 if "extracted_text" not in st.session_state:
     st.session_state.extracted_text = ""
 
-# Create two clean tabs specifically restricted to her requested components
+# Layout components
 tab1, tab2 = st.tabs(["📝 Quiz Generator", "🗂️ Flashcards"])
 
 with tab1:
     st.header("Podcast Quiz Component")
     st.write("Upload an advanced science document or script to build your quiz.")
     
-    # Allows both lowercase and uppercase extensions so nothing gets blocked
     uploaded_file = st.file_uploader(
         "Drop your file here (Supports PDFs and TXT files)", 
         type=["pdf", "PDF", "txt", "TXT"],
@@ -47,7 +45,7 @@ with tab1:
                 
                 st.session_state.quiz_ready = True
             except Exception as e:
-                st.error("🚨 Error parsing file content. Please re-upload or try opening in an Incognito window.")
+                st.error("🚨 Error parsing file content. Please re-upload.")
     
     if st.session_state.quiz_ready:
         st.info("🎯 Your 20-minute audio session quiz data is ready to generate!")
@@ -67,11 +65,6 @@ with tab2:
     st.header("Flashcards Component")
     if st.session_state.quiz_ready:
         st.write("Review key terms extracted from your processed test file:")
-        
-        # Clean custom display using Streamlit's official help box structure for safety
-        st.help({
-            "TERM": "Aerodynamic Matrix",
-            "DEFINITION": "The multi-layered environment where fluid dynamics and air drag intercept solid boundaries."
-        })
+        st.info("**TERM:** Aerodynamic Matrix\n\n**DEFINITION:** The multi-layered environment where fluid dynamics and air drag intercept solid boundaries.")
     else:
         st.warning("⚠️ Please upload a science document in the Quiz tab first to populate your flashcards.")

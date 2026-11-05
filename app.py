@@ -1,5 +1,6 @@
 import streamlit as st
 import io
+from pypdf import PdfReader
 
 # 1. Page Configuration & Theme Initialization
 st.set_page_config(
@@ -9,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom beige and bright gray styling variables on an ultra-dark developer theme
+# Custom beige and bright gray styling variables on our dark developer theme
 st.markdown(
     """
     <style>
@@ -69,6 +70,21 @@ st.markdown(
 # Import podcast processing structures directly 
 from podcast import render_podcast_app
 
+def extract_text_from_pdf(file_bytes):
+    """Helper function to read binary PDF content and merge page text streams."""
+    try:
+        pdf_file = io.BytesIO(file_bytes)
+        reader = PdfReader(pdf_file)
+        extracted_text = ""
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                extracted_text += text + "\n"
+        return extracted_text.strip()
+    except Exception as e:
+        st.error(f"Error parsing PDF file: {e}")
+        return None
+
 # 2. Main Platform Pipeline Control
 def main():
     st.title("⚡ Studley Workspace Platform")
@@ -82,20 +98,32 @@ def main():
         st.markdown(
             '<div class="gate-container">'
             '<h3>⚠️ System Restricted Access Gate</h3>'
-            '<p>Please upload your primary core study script file (.txt) below to unlock your personalized dashboard, quiz modules, and podcast mixers.</p>'
+            '<p>Please upload your primary core study script file (.txt or .pdf) below to unlock your personalized dashboard, quiz modules, and podcast mixers.</p>'
             '</div>', 
             unsafe_allow_html=True
         )
         
+        # Added "pdf" to type list to fulfill our multi-format processing constraint
         uploaded_gate_file = st.file_uploader(
             "Upload Master Study Guide Content:",
-            type=["txt"],
+            type=["txt", "pdf"],
             key="studley_master_gate_uploader"
         )
         
         if uploaded_gate_file is not None:
-            st.session_state.workspace_file_content = uploaded_gate_file.read().decode("utf-8")
-            st.rerun()
+            file_extension = uploaded_gate_file.name.split(".")[-1].lower()
+            raw_bytes = uploaded_gate_file.read()
+            
+            if file_extension == "pdf":
+                with st.spinner("Extracting structural text from PDF pages..."):
+                    parsed_text = extract_text_from_pdf(raw_bytes)
+                    if parsed_text:
+                        st.session_state.workspace_file_content = parsed_text
+                        st.rerun()
+            else:
+                # Handle basic plain text files safely
+                st.session_state.workspace_file_content = raw_bytes.decode("utf-8")
+                st.rerun()
         return
 
     # Clear Workspace Action Link
@@ -125,7 +153,6 @@ def main():
         st.header("📝 Automated Study Review Quiz")
         st.write("Test your knowledge against structural details pulled directly from your master document file.")
         
-        # Simple local text validation parsing to break out question banks
         questions = [
             {"q": "What is the primary target objective of this custom Study Guide session?", "a": "Deep-dive structural clarity and conceptual optimization."},
             {"q": "How should long-form runtime sessions be managed cleanly over extended processing timelines?", "a": "By leveraging persistent memory loops and state-managed file buffers."},

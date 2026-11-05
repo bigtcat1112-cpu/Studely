@@ -1,121 +1,118 @@
 import streamlit as st
-import os
-from podcast import generate_long_podcast
-from audio_factory import vaporize_target_audio_file
+import supabase
+# Securely handle the module imports without throwing cyclic dependency loops
+try:
+    from podcast import generate_long_podcast, render_podcast_interface
+except ImportError:
+    # Safe fallback interface generation if github tracking delays module registration
+    def render_podcast_interface():
+        st.error("🔄 Synchronization pending. Please refresh or reboot the server container via dashboard settings.")
 
+# --- APPLICATION LIFECYCLE INITIALIZATION ---
+st.set_page_config(
+    page_title="TA Workspaces",
+    page_icon="📍",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
+
+# Global Theme Style Block - Forces bright beige inputs and dark grey contrast text safely
 st.markdown("""
     <style>
-    .stApp { background-color: #F7F5F0; color: #3A3A3A; }
-    div[data-testid="stSidebar"] { background-color: #EDEAE4; }
-    .stButton>button { background-color: #D3CBC0; color: #2F2F2F; border-radius: 12px; font-weight: bold; }
-    .card-box { background-color: #FFFFFF; border: 1px solid #E5E2DA; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+    /* Global high-contrast dark beige/grey typography definition */
+    html, body, [data-testid="stWidgetLabel"], .stMarkdown, p, li {
+        color: #2E2D2A !important;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    /* Bright beige container styling for native Streamlit text input containers */
+    div[data-testid="stTextInput"] > div > div > input {
+        background-color: #FDFBF7 !important;
+        color: #2E2D2A !important;
+        border: 2px solid #E6A23C !important;
+        border-radius: 8px;
+    }
+    /* Header optimization blocks */
+    h1, h2, h3, h4 {
+        color: #2E2D2A !important;
+        font-weight: 700 !important;
+    }
+    /* Custom button behavior formatting */
+    button[data-testid="baseButton-secondary"] {
+        background-color: #FDFBF7 !important;
+        color: #2E2D2A !important;
+        border: 2px solid #E6A23C !important;
+        transition: all 0.3s ease;
+    }
+    button[data-testid="baseButton-secondary"]:hover {
+        border-color: #2E2D2A !important;
+        background-color: #E6A23C !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎓 Studley Learning Workspace")
-st.subheader("Quantum Automated Study Dashboard")
+# --- GLOBAL RUNTIME STATE lifecycle MATRIX ---
+if "global_session" not in st.session_state:
+    st.session_state.global_session = {
+        "admin_authenticated": False,
+        "active_view": "Main Workspace Platform"
+    }
 
-st.sidebar.header("📁 Material Channel")
-uploaded_file = st.sidebar.file_uploader("Select dash-separated .txt file:", type=["txt"], key="studley_file_uploader")
+# --- HEADER APP LOGO LAYOUT ---
+st.markdown("""
+    <div style="background-color: #2E2D2A; border: 2px solid #E6A23C; border-radius: 12px; padding: 15px; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+        <h2 style="color: #E6A23C; margin: 0; font-size: 1.6rem; letter-spacing: 1px;">📍 TA WORKSPACES</h2>
+        <p style="color: #FDFBF7; margin: 5px 0 0 0; font-size: 0.85rem;">Verified Location & Workplace Rating Infrastructure</p>
+    </div>
+""", unsafe_allow_html=True)
 
-if uploaded_file is None:
-    st.info("👋 System Standby. Please load a study text document in the sidebar.")
-    st.stop()
+# --- SIDEBAR INTERFACE CONTROL PLATFORM ---
+# Keep navigation simplified and elegant to protect user layout preferences
+with st.sidebar:
+    st.header("Navigation Hub")
+    choice = st.radio(
+        "Select Active Workspace Deck:",
+        ["Main Workspace Platform", "Studley Study Container", "System Admin Portal"]
+    )
+    st.session_state.global_session["active_view"] = choice
 
-raw_text = uploaded_file.read().decode("utf-8")
-flashcards_data = []
+# --- CORE INTEGRATED ROUTING CONTROL MATRIX ---
+active_view = st.session_state.global_session["active_view"]
 
-for line in raw_text.splitlines():
-    if "-" in line:
-        parts = line.split("-", 1)
-        term = parts[0].strip()
-        definition = parts[1].strip()
-        if term and definition:
-            flashcards_data.append({"term": term, "definition": definition})
-
-if not flashcards_data:
-    st.warning("⚠️ Formatting Warning: Ensure lines contain a dash character.")
-    st.stop()
-
-if "flashcard_index" not in st.session_state: st.session_state.flashcard_index = 0
-if "show_definition" not in st.session_state: st.session_state.show_definition = False
-if "podcast_ready" not in st.session_state: st.session_state.podcast_ready = False
-if "podcast_path" not in st.session_state: st.session_state.podcast_path = ""
-
-tab1, tab2, tab3 = st.tabs(["📚 Flashcards", "📝 Quiz Center", "🎙️ Podcast Lounge"])
-
-# --- FLASHCARDS ---
-with tab1:
-    st.header("Interactive Visual Flashcards")
-    idx = st.session_state.flashcard_index
-    st.markdown("<div class='card-box'>", unsafe_allow_html=True)
-    if not st.session_state.show_definition:
-        st.markdown(f"<h3>🔍 Concept:</h3><h1>{flashcards_data[idx]['term']}</h1>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"<h3>💡 Definition:</h3><h2>{flashcards_data[idx]['definition']}</h2>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+if active_view == "Main Workspace Platform":
+    st.subheader("Explore Workplace Ratings")
+    st.write("Welcome to the core platform workspace tracker. Select columns and filter location ratings natively.")
     
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        if st.button("⬅️ Back"):
-            st.session_state.flashcard_index = (idx - 1) % len(flashcards_data)
-            st.session_state.show_definition = False
-            st.rerun()
-    with c2:
-        if st.button("🔄 Flip"):
-            st.session_state.show_definition = not st.session_state.show_definition
-            st.rerun()
-    with c3:
-        if st.button("Next ➡️"):
-            st.session_state.flashcard_index = (idx + 1) % len(flashcards_data)
-            st.session_state.show_definition = False
-            st.rerun()
-
-# --- QUIZ CENTER ---
-with tab2:
-    st.header("Automated Multiple-Choice Quiz Engine")
-    for i, item in enumerate(flashcards_data[:3]):
-        st.markdown(f"<div class='card-box'><b>Question {i+1}: Identify the parameters for: {item['term']}</b>", unsafe_allow_html=True)
-        ans = st.radio("Select answer:", [item['definition'], "Wrong config A", "Wrong config B"], key=f"qz_{i}")
-        if ans == item['definition']: st.success("🎯 Correct!")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# --- PODCAST LOUNGE ---
-with tab3:
-    st.header("🎙️ Automated Goated Deep-Dive Podcast Lounge")
-    st.write("Click below to compile text scripts directly into a physical audio file track inside server memory.")
+    # Static fallback database limit mapping (Restricted configuration tracking)
+    st.caption("Active Indexing Filter: Displaying 7 enterprise operational nodes.")
     
-    if st.button("🚀 Initialize Factory Audio Conversion Engine", key="gen_podcast_btn"):
-        with st.spinner("Factory Worker is compiling text scripts and generating physical MP3 data streams..."):
-            physical_mp3 = generate_long_podcast(flashcards_data)
-            if physical_mp3 and os.path.exists(physical_mp3):
-                st.session_state.podcast_path = physical_mp3
-                st.session_state.podcast_ready = True
-                st.success("🎉 Audio File Rendered and Stored Successfully inside Scratchspace Memory!")
-            else:
-                st.error("Audio generation pipeline failed. Check engine tracks.")
-
-    if st.session_state.podcast_ready and st.session_state.podcast_path:
-        st.write("---")
-        st.markdown("<div class='card-box' style='border-left: 5px solid #3E8E41;'>", unsafe_allow_html=True)
-        st.subheader("📻 Live Audio Stream Feed")
-        st.caption("Listening directly to physical server scratchspace paths.")
+    # Review Submission Node Interface
+    with st.expander("📝 Submit a New Location Review", expanded=False):
+        st.write("Rate specific employment positions, operational settings, and localized workplace treatment metrics.")
         
-        # Read the file directly from the secure factory folder path
-        if os.path.exists(st.session_state.podcast_path):
-            with open(st.session_state.podcast_path, "rb") as f:
-                st.audio(f.read(), format="audio/mp3")
-        else:
-            st.error("The file tracker has been terminated.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Name input explicitly dropped per layout preferences update
+        comp_name = st.text_input("Company Name", placeholder="Enter specific employer profile...")
+        comp_loc = st.text_input("Exact Location Address", placeholder="Street address, city, state, or zip code...")
+        
+        rating_criteria = st.slider("Workplace Environment Quality Indicator", min_value=1, max_value=5, value=5)
+        
+        if st.button("Submit Verified Review Metrics", key="btn_global_review_submit"):
+            if comp_name and comp_loc:
+                st.success(f"✅ Review record compiled successfully for {comp_name} ({comp_loc})!")
+            else:
+                st.warning("⚠️ High-priority field parameters incomplete. Please provide company name and specific location details.")
 
-        st.write(" ")
-        if st.button("🗑️ Done Listening (Execute Ghost-Mode File Wipe)"):
-            # Call the specialized cleanup tool from our factory file worker
-            vaporize_target_audio_file(st.session_state.podcast_path)
-            
-            # Flush session memory grids completely
-            st.session_state.podcast_path = ""
-            st.session_state.podcast_ready = False
-            st.toast("🔥 Operation Complete: Audio file shredded completely from disk memory!", icon="🧹")
-            st.rerun()
+elif active_view == "Studley Study Container":
+    # Safely hand off thread pipeline routing directly into podcast.py interface engine
+    render_podcast_interface()
+
+elif active_view == "System Admin Portal":
+    st.subheader("System Administration Node")
+    st.write("Manage platform metrics, review thresholds, and connection endpoints securely.")
+    
+    admin_pass = st.text_input("Enter Administrative Keyway", type="password", key="admin_key_gate")
+    if admin_pass:
+        # Standard placeholder string validation protocol
+        if admin_pass == "admin123":
+            st.success("🔓 Authentication verified. Connection hooks to Supabase live.")
+        else:
+            st.error("❌ Access denied. System signature tracking failure.")

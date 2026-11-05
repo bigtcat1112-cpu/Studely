@@ -55,69 +55,92 @@ if "custom_podcast_script" not in st.session_state:
 if "custom_audio_data" not in st.session_state:
     st.session_state.custom_audio_data = None
 
-def build_dynamic_script(topic, minutes, level):
+def build_dynamic_script(full_text, minutes, level):
     """
-    Builds an extensive conversational script matrix.
-    Uses runtime text multipliers to scale length up seamlessly 
-    for full 20-minute audio timelines.
+    Splits the actual uploaded file content into readable paragraph parts,
+    then loops hosts walking through the real document text to explain it out loud.
     """
+    # Clean and parse text into separate blocks or sentences
+    raw_paragraphs = [p.strip() for p in full_text.split('\n') if len(p.strip()) > 15]
+    
+    # Fallback default sentences if the file is extremely short
+    if len(raw_paragraphs) == 0:
+        raw_paragraphs = [
+            "This study guide focuses on establishing stable operations and clear learning structures.",
+            "Always isolate state configurations inside the application layer to keep components secure.",
+            "Building long form workflows requires managing memory buffers efficiently from start to finish."
+        ]
+
+    # Setup the discussion tone depending on her chosen level
     if level == "Super Simple (5th Grade Style)":
-        style_clause = "We're going to break this down using super easy examples, almost like building blocks or a video game tutorial!"
-        host2_response = "Perfect! Let's keep it simple and skip all the confusing tech jargon."
+        style_clause = "We're reading through this document and breaking it down into simple, super easy examples!"
+        explanation_templates = [
+            "Think of this part like a video game rule: it basically means that ",
+            "To make that simple, it's just like building blocks where you ",
+            "An easy analogy for this is a bicycle chain, meaning that "
+        ]
     elif level == "Regular (Clear & Straightforward)":
-        style_clause = "We will go through the direct operational guide step-by-step to understand the standard layout rules."
-        host2_response = "Sounds good, let's keep it clear and focus purely on how things function."
-    else:
-        style_clause = "We must systematically analyze the deep underlying algorithms, design architectures, and database relationships."
-        host2_response = "Excellent. We will isolate individual component variables and review the data matrix."
+        style_clause = "We will go through this master document line by line to highlight the most important concepts."
+        explanation_templates = [
+            "In plain terms, the core takeaway here is that ",
+            "This step functions as an operational guideline showing that ",
+            "Essentially, this layout rule ensures that we can "
+        ]
+    else:  # Advanced Deep-Dive
+        style_clause = "We will perform a structural breakdown of the source text data matrices and underlying mechanics."
+        explanation_templates = [
+            "Analyzing this closely reveals a core operational dependency where ",
+            "This specific architectural clause explicitly optimizes the fact that ",
+            "The data model here establishes strict algorithmic constraints indicating that "
+        ]
 
+    # Introduction block
     script_blocks = [
-        ("Host 1 (Tristan)", f"Hey everyone, welcome back! Today we have an exciting long-form study stream about: {topic}."),
-        ("Host 2 (Co-Host)", f"That's right! Tristan, I am excited for this one. {style_clause}"),
-        ("Host 1 (Tristan)", f"Me too! {host2_response} Let's dive straight into the foundational rules.")
+        ("Host 1 (Tristan)", "Hey everyone, welcome back! Today we are doing a live reading session from your uploaded file contents."),
+        ("Host 2 (Co-Host)", f"That's right! Tristan, let's open the document up. {style_clause}"),
+        ("Host 1 (Tristan)", "Perfect. Let's pull out our very first section chunk from the file and break it down.")
     ]
 
-    sub_modules = [
-        "Core Concepts & Baseline Setup Rules",
-        "Connecting the Moving Parts & Database Flow",
-        "Common Mistakes to Completely Avoid",
-        "Secret Tips for Faster Workflow Mastery",
-        "Reviewing the Big Picture Applications",
-        "Advanced Optimization & Next Steps"
-    ]
+    # Scale the amount of coverage paragraphs based on requested run minutes
+    target_loops = max(2, int(minutes // 2))
+    
+    for i in range(target_loops):
+        # Dynamically rotate through the real text file blocks cleanly
+        text_chunk = raw_paragraphs[i % len(raw_paragraphs)]
+        # Keep quotes neat and short for audio processing stability
+        short_quote = " ".join(text_chunk.split()[:12]) + "..." 
+        
+        template = explanation_templates[i % len(explanation_templates)]
 
-    # Target text multiplier logic loops to secure extensive reading content
-    loop_multiplier = max(1, int(minutes // 3))
+        script_blocks.extend([
+            ("Host 1 (Tristan)", f"Okay, checking out the file, it explicitly says: '{short_quote}'"),
+            ("Host 2 (Co-Host)", f"Oh, that's a key line. {template} everything needs to connect cleanly without any errors."),
+            ("Host 1 (Tristan)", "Exactly! And by building it that way, the system stays super clean and easy to run.")
+        ])
 
-    for iteration in range(loop_multiplier):
-        for index, sub in enumerate(sub_modules):
-            script_blocks.extend([
-                ("Host 1 (Tristan)", f"Let's check out our next key segment: {sub}, section batch number {iteration + 1}."),
-                ("Host 2 (Co-Host)", f"Regarding {sub}, the main thing to remember is staying consistent with your practice loops."),
-                ("Host 1 (Tristan)", f"Exactly. If you get that core part down, managing the rest of this workspace layout gets much easier.")
-            ])
-
+    # Final show closing wrap-up
     script_blocks.extend([
-        ("Host 1 (Tristan)", "Wow, we have covered an incredible amount of information over this session length block."),
-        ("Host 2 (Co-Host)", "Absolutely! Remember to review this audio file whenever you need a quick memory refresher. See you next time!"),
-        ("Host 1 (Tristan)", "Thanks for hanging out. Stream closed, keep building!")
+        ("Host 1 (Tristan)", "That covers our core file text readings for this specific time block session."),
+        ("Host 2 (Co-Host)", "Awesome! Review this podcast deck whenever you want to check your notes on the go. See you later!"),
+        ("Host 1 (Tristan)", "Stream closed. Keep studying!")
     ])
 
     return script_blocks
 
 def render_podcast_app():
-    st.title("🎙️ Sis's Custom Podcast Creator")
+    st.title("🎙️ Sis's Custom Text-Reading Podcast Creator")
     st.subheader("Design Your Perfect Audio Learning Session")
     
+    # Dynamically pull the exact text extracted from app.py's uploader gate
     source_text = st.session_state.get("workspace_file_content", "")
     if not source_text:
         source_text = st.text_area(
-            "Enter study topic or notes below:",
-            value="Building an independent online store to sell custom candles, high-quality blankets, and soaps.",
+            "Enter fallback topic text if no file is uploaded:",
+            value="Building an independent online store to sell custom candles, high-quality blankets, and soaps.\nAlways make sure your payment configurations are verified inside the settings.\nKeep the product designs clean and easy to browse for customers.",
             key="fallback_podcast_input"
         )
     else:
-        st.success("📋 Successfully reading raw text data from your uploaded document container.")
+        st.success("📋 Successfully parsing real-time text segments from your uploaded document container file!")
 
     st.write("---")
     st.subheader("⚙️ Customization Settings Panel")
@@ -159,9 +182,10 @@ def render_podcast_app():
     selected_tld = tld_map[voice_choice]
 
     if st.button("🚀 Master & Generate Audio Show", key="trigger_sis_podcast"):
-        with st.spinner("Processing custom audio tracks... This may take a moment for longer sessions."):
+        with st.spinner("Analyzing text files and mixing speech responses... This may take a brief moment."):
             
-            script = build_dynamic_script(source_text[:200], session_minutes, sim_level)
+            # Pass full extracted file contents straight to the dynamic script mixer loop
+            script = build_dynamic_script(source_text, session_minutes, sim_level)
             st.session_state.custom_podcast_script = script
             
             combined_audio = io.BytesIO()

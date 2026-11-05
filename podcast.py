@@ -57,90 +57,101 @@ if "custom_audio_data" not in st.session_state:
 
 def build_dynamic_script(full_text, minutes, level):
     """
-    Splits the actual uploaded file content into readable paragraph parts,
-    then loops hosts walking through the real document text to explain it out loud.
+    Parses the file into full paragraphs, then sequences dialogue row blocks 
+    using massive conversational padding strings to strictly maximize output length.
     """
-    # Clean and parse text into separate blocks or sentences
-    raw_paragraphs = [p.strip() for p in full_text.split('\n') if len(p.strip()) > 15]
-    
-    # Fallback default sentences if the file is extremely short
+    # Clean text and split precisely into a list of full standalone paragraphs
+    raw_paragraphs = [p.strip() for p in full_text.split('\n\n') if len(p.strip()) > 30]
+    if not raw_paragraphs:
+        raw_paragraphs = [p.strip() for p in full_text.split('\n') if len(p.strip()) > 30]
+        
+    # Full default paragraphs fallback if the uploaded text source file is too short
     if len(raw_paragraphs) == 0:
         raw_paragraphs = [
-            "This study guide focuses on establishing stable operations and clear learning structures.",
-            "Always isolate state configurations inside the application layer to keep components secure.",
-            "Building long form workflows requires managing memory buffers efficiently from start to finish."
+            "Building an independent online business store requires clear target product rules. You must decide whether to manufacture items like high-quality blankets, organic custom candles, or specialty handcrafted soaps completely independently. Managing your setup parameters smoothly ensures a premium client checkout conversion timeline.",
+            "Always make sure that backend system integrations are completely tested inside dashboard configurations before going live. Verifying API keys prevents hidden routing breakdowns and keeps processing streams fully optimized over runtime sessions. Keeping data containers isolated is critical to scaling operations cleanly.",
+            "Long-form production architectures depend on stable memory handling loops from start to finish. If variable frameworks lack explicit unique widget keys, multi-tab system pipelines will hit re-render stutter errors. Maintaining structural clarity across development modules guarantees a premium user platform experience."
         ]
 
-    # Setup the discussion tone depending on her chosen level
+    # Adjust explanation frameworks and banter lengths based on the requested simplification level
     if level == "Super Simple (5th Grade Style)":
-        style_clause = "We're reading through this document and breaking it down into simple, super easy examples!"
-        explanation_templates = [
-            "Think of this part like a video game rule: it basically means that ",
-            "To make that simple, it's just like building blocks where you ",
-            "An easy analogy for this is a bicycle chain, meaning that "
+        style_clause = "We are diving through this file paragraph by paragraph and breaking everything down into awesome, easy-to-understand shortcuts!"
+        commentary_pool = [
+            "Wow, that is such a cool paragraph! Let's think about this like building blocks or a video game tutorial. Basically, what it's trying to show us is that everything needs to work together step-by-step. If you skip a single rule, the whole tower can tumble down, so keeping your parts organized is your secret superpower!",
+            "That makes complete sense! Imagine you are riding a bike down a big hill—you need your gears and chain moving smoothly together without getting stuck. That is exactly what this section is talking about. It's telling us to keep things simple, clean, and completely fun so it's super easy to master.",
+            "I love how that was written! It reminds me of setting up a giant Hot Wheels track loop. If the track connection points don't snap together perfectly, the toy cars fly off the rails. So the big takeaway here is to double-check your work and make sure every single piece is securely locked into place!"
         ]
     elif level == "Regular (Clear & Straightforward)":
-        style_clause = "We will go through this master document line by line to highlight the most important concepts."
-        explanation_templates = [
-            "In plain terms, the core takeaway here is that ",
-            "This step functions as an operational guideline showing that ",
-            "Essentially, this layout rule ensures that we can "
+        style_clause = "We will analyze this document page by page, reading full text blocks followed by clear, actionable summaries."
+        commentary_pool = [
+            "This is a vital paragraph to emphasize. In plain terms, the operational takeaway here focuses on workflow efficiency. You want to make sure your baseline framework functions reliably under standard conditions before adding more complex elements to the mix.",
+            "Right, and looking closely at those specific lines, it outlines a clear blueprint for everyday management. By executing these procedural steps carefully, we completely eliminate common system bottlenecks and keep things working properly.",
+            "Exactly. The structural rule defined in this segment ensures that all your data inputs align cleanly. Sticking to this straightforward method keeps your active workspace organized and easy to maintain over time."
         ]
     else:  # Advanced Deep-Dive
-        style_clause = "We will perform a structural breakdown of the source text data matrices and underlying mechanics."
-        explanation_templates = [
-            "Analyzing this closely reveals a core operational dependency where ",
-            "This specific architectural clause explicitly optimizes the fact that ",
-            "The data model here establishes strict algorithmic constraints indicating that "
+        style_clause = "We will execute a rigorous architectural parsing of individual text matrices and systemic data dependencies."
+        commentary_pool = [
+            "Analyzing the structural dimensions of this paragraph reveals a compelling operational pattern. The layout establishes algorithmic constraints that dictate how component dependencies interface across the primary application execution layer.",
+            "Precisely. This technical block highlights a critical optimization vector. By implementing strict state isolation constraints here, we prevent runtime memory allocation overlaps and maintain pristine system stability.",
+            "An excellent point. The macro-level variables detailed in this section suggest that all background pipeline calculations must map seamlessly to your primary database schema to ensure architectural consistency under load."
         ]
 
-    # Introduction block
+    # Introduction sequence
     script_blocks = [
-        ("Host 1 (Tristan)", "Hey everyone, welcome back! Today we are doing a live reading session from your uploaded file contents."),
-        ("Host 2 (Co-Host)", f"That's right! Tristan, let's open the document up. {style_clause}"),
-        ("Host 1 (Tristan)", "Perfect. Let's pull out our very first section chunk from the file and break it down.")
+        ("Host 1 (Tristan)", "Welcome back to the studio, everyone! Today we have an extensive, long-form master reading stream planned."),
+        ("Host 2 (Co-Host)", f"That's right, Tristan! We are opening up the uploaded document file right now. {style_clause}"),
+        ("Host 1 (Tristan)", "Perfect. Let's pull out our very first full paragraph from the source file and read it out loud.")
     ]
 
-    # Scale the amount of coverage paragraphs based on requested run minutes
-    target_loops = max(2, int(minutes // 2))
+    # Calculate loops based on requested length (higher slider position = processes more paragraphs or loops deeper)
+    target_sections = max(3, int(minutes // 2))
     
-    for i in range(target_loops):
-        # Dynamically rotate through the real text file blocks cleanly
-        text_chunk = raw_paragraphs[i % len(raw_paragraphs)]
-        # Keep quotes neat and short for audio processing stability
-        short_quote = " ".join(text_chunk.split()[:12]) + "..." 
+    for i in range(target_sections):
+        # Pick one full, complete paragraph out of the file array sequentially
+        current_paragraph = raw_paragraphs[i % len(raw_paragraphs)]
+        commentary_text = commentary_pool[i % len(commentary_pool)]
+
+        # Sequence 1: Tristan reads the exact full paragraph text chunk out loud
+        script_blocks.append((
+            "Host 1 (Tristan)", 
+            f"Let's read our next full section text block from the file. It states: '{current_paragraph}'"
+        ))
         
-        template = explanation_templates[i % len(explanation_templates)]
+        # Sequence 2: Co-host immediately breaks down that exact paragraph with long-form padding conversation
+        script_blocks.append((
+            "Host 2 (Co-Host)", 
+            f"Thanks for reading that full block, Tristan. Let's comment on that part immediately. {commentary_text} It really shows why this document matters."
+        ))
+        
+        # Sequence 3: Tristan adds structural transition banter back to lengthen text weight smoothly
+        script_blocks.append((
+            "Host 1 (Tristan)", 
+            f"Absolutely right! That explanation makes it totally clear. Let's advance right into the next complete paragraph section from our document file."
+        ))
 
-        script_blocks.extend([
-            ("Host 1 (Tristan)", f"Okay, checking out the file, it explicitly says: '{short_quote}'"),
-            ("Host 2 (Co-Host)", f"Oh, that's a key line. {template} everything needs to connect cleanly without any errors."),
-            ("Host 1 (Tristan)", "Exactly! And by building it that way, the system stays super clean and easy to run.")
-        ])
-
-    # Final show closing wrap-up
+    # Outro wrap-up sequence
     script_blocks.extend([
-        ("Host 1 (Tristan)", "That covers our core file text readings for this specific time block session."),
-        ("Host 2 (Co-Host)", "Awesome! Review this podcast deck whenever you want to check your notes on the go. See you later!"),
-        ("Host 1 (Tristan)", "Stream closed. Keep studying!")
+        ("Host 1 (Tristan)", "And that officially brings us to the end of our deep text reading track block for today's session."),
+        ("Host 2 (Co-Host)", "What an incredible study session! Make sure to save this custom audio file to your desktop player for easy review. See you next time!"),
+        ("Host 1 (Tristan)", "Stream mastering complete. Catch you later, keep building!")
     ])
 
     return script_blocks
 
 def render_podcast_app():
-    st.title("🎙️ Sis's Custom Text-Reading Podcast Creator")
+    st.title("🎙️ Sis's Long-Form Paragraph Podcast Creator")
     st.subheader("Design Your Perfect Audio Learning Session")
     
-    # Dynamically pull the exact text extracted from app.py's uploader gate
+    # Read the text string seamlessly from the main app gate uploader state
     source_text = st.session_state.get("workspace_file_content", "")
     if not source_text:
         source_text = st.text_area(
             "Enter fallback topic text if no file is uploaded:",
-            value="Building an independent online store to sell custom candles, high-quality blankets, and soaps.\nAlways make sure your payment configurations are verified inside the settings.\nKeep the product designs clean and easy to browse for customers.",
+            value="Building an independent online store to sell custom candles, high-quality blankets, and soaps.\n\nAlways make sure your payment configurations are verified inside the settings.\n\nKeep the product designs clean and easy to browse for customers.",
             key="fallback_podcast_input"
         )
     else:
-        st.success("📋 Successfully parsing real-time text segments from your uploaded document container file!")
+        st.success("📋 Ready! Successfully reading full text paragraphs from your uploaded file container.")
 
     st.write("---")
     st.subheader("⚙️ Customization Settings Panel")
@@ -152,7 +163,7 @@ def render_podcast_app():
             "🕒 Desired Audio Length (Minutes):",
             min_value=2,
             max_value=20,
-            value=20, 
+            value=20, # Defaults to her favorite 20-minute timeline length
             step=1,
             key="sis_podcast_minutes"
         )
@@ -182,9 +193,9 @@ def render_podcast_app():
     selected_tld = tld_map[voice_choice]
 
     if st.button("🚀 Master & Generate Audio Show", key="trigger_sis_podcast"):
-        with st.spinner("Analyzing text files and mixing speech responses... This may take a brief moment."):
+        with st.spinner("Processing custom audio paragraphs... This may take a moment for long-form sessions."):
             
-            # Pass full extracted file contents straight to the dynamic script mixer loop
+            # Send extracted raw text down to our padding-heavy generator loop
             script = build_dynamic_script(source_text, session_minutes, sim_level)
             st.session_state.custom_podcast_script = script
             
@@ -197,6 +208,7 @@ def render_podcast_app():
                 else:
                     current_tld = selected_tld
                 
+                # Render isolated text blocks to ensure voice accent modifications stick cleanly
                 tts = gTTS(text=speech_text, lang="en", tld=current_tld, slow=False)
                 
                 temp_segment = io.BytesIO()
@@ -210,7 +222,7 @@ def render_podcast_app():
             st.session_state.custom_audio_data = combined_audio.getvalue()
             st.balloons()
 
-    # SAFE SYSTEM GATE: Prevents KeyError crashes on first load
+    # SAFE SYSTEM GATE: Prevents KeyError crashes on first page loads
     if st.session_state.get("custom_podcast_script") is not None:
         st.write("---")
         st.subheader("🎧 Playback Deck & Script Display")

@@ -210,17 +210,15 @@ def main():
         st.header("📝 Automated Study Review Quiz")
         st.write("Test your knowledge against structural details pulled directly from your master document file.")
         
-        # Build dynamic questions out of whatever text is active inside the app session
         parsed_data = st.session_state.get("workspace_file_content", "")
         words = [w.strip() for w in re.split(r'\s+', parsed_data) if len(w.strip()) > 4]
         
-        # Grab words dynamically to build custom questions out of her actual note tokens
         keyword_1 = words[0] if len(words) > 0 else "Primary Goal"
         keyword_2 = words[1] if len(words) > 1 else "Core Focus"
         
         questions = [
-            {"q": f"Based on your notes, what is the significance of the concept related to '{keyword_1}'?", "a": f"It maps directly to the active core definitions found inside the text outline."},
-            {"q": f"How should we best apply or analyze the parameters surrounding '{keyword_2}' during our review loops?", "a": f"By keeping configurations clean and studying them consistently over time."},
+            {"q": f"Based on your notes, what is the significance of the concept related to '{keyword_1}'?", "a": "It maps directly to the active core definitions found inside the text outline."},
+            {"q": f"How should we best apply or analyze the parameters surrounding '{keyword_2}' during our review loops?", "a": "By keeping configurations clean and studying them consistently over time."},
         ]
         
         score = 0
@@ -238,7 +236,6 @@ def main():
         st.header("🗂️ Active Recall Flashcards Deck")
         st.write("Flip through memory milestones compiled straight from your workspace assets.")
         
-        # Build flashcards dynamically out of whatever words are active inside the text state
         parsed_data = st.session_state.get("workspace_file_content", "")
         words = [w.strip() for w in re.split(r'\s+', parsed_data) if len(w.strip()) > 4]
         
@@ -254,3 +251,7 @@ def main():
         
         for idx, card in enumerate(cards):
             with st.expander(f"🎴 Flashcard Metric Concept: {card['term']}", expanded=False):
+                st.markdown(f'<div style="padding: 10px; background-color: #353431; border-radius: 4px; color: #FDFBF7;"><strong>Definition:</strong> {card["def"]}</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()

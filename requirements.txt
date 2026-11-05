@@ -2,3 +2,6 @@ streamlit
 gTTS
 pydub
 pypdf
+easyocr
+pillow
+numpy

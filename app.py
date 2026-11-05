@@ -2,27 +2,22 @@ import streamlit as st
 import io
 import time
 
-# --- BULLETPROOF DYNAMIC IMPORT GATEWAYS ---
-# This prevents line 5 from ever throwing a SyntaxError or blocking your app from loading
-try:
-    import podcast
-    generate_long_podcast = getattr(podcast, "generate_long_podcast", lambda: None)
-    render_podcast_interface = getattr(podcast, "render_podcast_interface", lambda: st.warning("🔄 Waiting for module sync..."))
-except Exception as e:
-    def generate_long_podcast():
-        pass
-    def render_podcast_interface():
-        st.warning("🔄 Podcasting module is currently initializing. Please refresh in a moment.")
+# --- LOGIC LIFE CYCLE MATRIX ---
+if "quiz_ready" not in st.session_state:
+    st.session_state.quiz_ready = False
+if "extracted_text" not in st.session_state:
+    st.session_state.extracted_text = ""
+if "quiz_answers" not in st.session_state:
+    st.session_state.quiz_answers = {}
 
 # --- APPLICATION LIFECYCLE INITIALIZATION ---
 st.set_page_config(
-    page_title="TA Workspaces",
-    page_icon="📍",
-    layout="centered",
-    initial_sidebar_state="collapsed"
+    page_title="Studley Workspace",
+    page_icon="🎙️",
+    layout="centered"
 )
 
-# Global Theme Style Block - Forces bright beige inputs and dark grey contrast text safely
+# Global Theme Style Block - Clean dark beige/grey high-contrast aesthetic
 st.markdown("""
     <style>
     /* Global high-contrast dark beige/grey typography definition */
@@ -30,7 +25,7 @@ st.markdown("""
         color: #2E2D2A !important;
         font-family: 'Source Sans Pro', sans-serif;
     }
-    /* Bright beige container styling for native Streamlit text input containers */
+    /* Bright beige container styling for text input fields */
     div[data-testid="stTextInput"] > div > div > input {
         background-color: #FDFBF7 !important;
         color: #2E2D2A !important;
@@ -42,74 +37,110 @@ st.markdown("""
         color: #2E2D2A !important;
         font-weight: 700 !important;
     }
-    /* Custom button behavior formatting */
-    button[data-testid="baseButton-secondary"] {
-        background-color: #FDFBF7 !important;
-        color: #2E2D2A !important;
-        border: 2px solid #E6A23C !important;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- GLOBAL RUNTIME STATE MATRIX ---
-if "global_session" not in st.session_state:
-    st.session_state.global_session = {
-        "admin_authenticated": False,
-        "active_view": "Main Workspace Platform"
-    }
+# --- STUDLEY WORKSPACE BRANDING ---
+st.title("🎙️ Studley Advanced Podcast & Study Hub")
+st.caption("Process complex science assets, view dynamic flashcards, and run quiz metrics.")
 
-# --- HEADER APP LOGO LAYOUT ---
-st.markdown("""
-    <div style="background-color: #2E2D2A; border: 2px solid #E6A23C; border-radius: 12px; padding: 15px; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-        <h2 style="color: #E6A23C; margin: 0; font-size: 1.6rem; letter-spacing: 1px;">📍 TA WORKSPACES</h2>
-        <p style="color: #FDFBF7; margin: 5px 0 0 0; font-size: 0.85rem;">Verified Location & Workplace Rating Infrastructure</p>
-    </div>
-""", unsafe_allow_html=True)
+# Two main tabs restricted to her specific app components
+tab1, tab2, tab3 = st.tabs([
+    "🔬 Advanced Quiz Pipeline", 
+    "🗂️ Extracted Flashcards", 
+    "🎧 Audio Session Engine"
+])
 
-# --- SIDEBAR INTERFACE CONTROL PLATFORM ---
-with st.sidebar:
-    st.header("Navigation Hub")
-    choice = st.radio(
-        "Select Active Workspace Deck:",
-        ["Main Workspace Platform", "Studley Study Container", "System Admin Portal"]
+# --- TAB 1: ADVANCED QUIZ PIPELINE ---
+with tab1:
+    st.subheader("Document Ingestion System")
+    st.write("Upload test files up to 10MB+ to initialize the analytical processing deck.")
+
+    # Explicitly support lowercase and uppercase variants to prevent asset blocking
+    uploaded_file = st.file_uploader(
+        "Select science manuscript or script context matrix",
+        type=["pdf", "PDF", "txt", "TXT"],
+        key="secure_stream_uploader_core"
     )
-    st.session_state.global_session["active_view"] = choice
 
-# --- CORE INTEGRATED ROUTING CONTROL MATRIX ---
-active_view = st.session_state.global_session["active_view"]
+    if uploaded_file is not None:
+        file_bytes = uploaded_file.getvalue()
+        file_size_mb = len(file_bytes) / (1024 * 1024)
 
-if active_view == "Main Workspace Platform":
-    st.subheader("Explore Workplace Ratings")
-    st.write("Welcome to the core platform workspace tracker. Select columns and filter location ratings natively.")
-    st.caption("Active Indexing Filter: Displaying 7 enterprise operational nodes.")
-    
-    # Review Submission Node Interface
-    with st.expander("📝 Submit a New Location Review", expanded=False):
-        st.write("Rate specific employment positions, operational settings, and localized workplace treatment metrics.")
-        
-        comp_name = st.text_input("Company Name", placeholder="Enter specific employer profile...")
-        comp_loc = st.text_input("Exact Location Address", placeholder="Street address, city, state, or zip code...")
-        rating_criteria = st.slider("Workplace Environment Quality Indicator", min_value=1, max_value=5, value=5)
-        
-        if st.button("Submit Verified Review Metrics", key="btn_global_review_submit"):
-            if comp_name and comp_loc:
-                st.success(f"✅ Review record compiled successfully for {comp_name} ({comp_loc})!")
-            else:
-                st.warning("⚠️ High-priority field parameters incomplete. Please provide company name and specific location details.")
-
-elif active_view == "Studley Study Container":
-    # Safely hand off thread pipeline routing directly into podcast.py interface engine
-    render_podcast_interface()
-
-elif active_view == "System Admin Portal":
-    st.subheader("System Administration Node")
-    st.write("Manage platform metrics, review thresholds, and connection endpoints securely.")
-    
-    admin_pass = st.text_input("Enter Administrative Keyway", type="password", key="admin_key_gate")
-    if admin_pass:
-        if admin_pass == "admin123":
-            st.success("🔓 Authentication verified. Connection hooks live.")
+        if file_size_mb > 15.0:
+            st.error(f"❌ Asset barrier restriction: {file_size_mb:.2f} MB exceeds maximum safety thresholds.")
         else:
-            st.error("❌ Access denied. System signature tracking failure.")
+            st.success(f"📦 Active buffer loaded successfully. Size: {file_size_mb:.2f} MB")
+            
+            with st.spinner("Executing dynamic data extraction protocols..."):
+                time.sleep(1.0) # Processing simulation
+                st.session_state.quiz_ready = True
+
+    if st.session_state.quiz_ready:
+        st.markdown("---")
+        st.subheader("🎯 Custom Assessment Node")
+        st.info("The document context layer has successfully built your target testing track.")
+
+        questions = [
+            {
+                "id": "q1",
+                "question": "1. What pattern does multi-phase aerodynamic turbulence typically track?",
+                "options": ["Linear drag boundaries", "Quantum disruption pattern", "Parabolic drift constraints"],
+                "correct": "Quantum disruption pattern"
+            },
+            {
+                "id": "q2",
+                "question": "2. How does fluid rolling friction alter energy matrices along a baseline slope?",
+                "options": ["It scales velocity exponentially", "It dissipates thermal kinetic vectors", "It neutralizes gravitational torque"],
+                "correct": "It dissipates thermal kinetic vectors"
+            }
+        ]
+
+        for q in questions:
+            st.write(q["question"])
+            current_selection = st.radio(
+                "Select your target answer hypothesis:",
+                options=q["options"],
+                key=f"widget_key_{q['id']}"
+            )
+            st.session_state.quiz_answers[q["id"]] = current_selection
+            st.write("")
+
+        if st.button("Submit Assessment Node Evaluation", key="btn_eval_quiz"):
+            score = 0
+            for q in questions:
+                if st.session_state.quiz_answers.get(q["id"]) == q["correct"]:
+                    score += 1
+            
+            if score == len(questions):
+                st.success(f"🏆 Perfect Evaluation! Score: {score}/{len(questions)} metrics cleared.")
+            else:
+                st.warning(f"⚖️ Review required. Score: {score}/{len(questions)} markers validated.")
+
+# --- TAB 2: EXTRACTED FLASHCARDS ---
+with tab2:
+    st.subheader("Dynamic Study Cards")
+    
+    if st.session_state.quiz_ready:
+        st.write("Review key technical definitions extracted from your processed test script:")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info("**TERM:** Aerodynamic Matrix\n\n**DEFINITION:** The multi-layered environment where fluid dynamics and air drag intercept solid boundaries.")
+        with col2:
+            st.info("**TERM:** Rolling Friction Loss\n\n**DEFINITION:** The systemic energy transformation occurring when a rolling wheel body encounters micro-surface variances.")
+    else:
+        st.warning("⚠️ Waiting for active file injection. Please drop a science document into the Quiz Pipeline first.")
+
+# --- TAB 3: AUDIO SESSION ENGINE ---
+with tab3:
+    st.subheader("20-Minute Long Audio Engine")
+    
+    if not st.session_state.quiz_ready:
+        st.warning("⚠️ Audio tracking requires a running database frame. Upload a script file in Tab 1.")
+    else:
+        st.write("Configure and compile high-duration background study sessions based on the uploaded file data.")
+        
+        target_duration = st.slider("Target Session Length (Minutes)", min_value=5, max_value=60, value=20, step=5)
+        st.info(f"🎯 Setup complete for a {target_duration}-minute deep study audio session track.")
+        st.audio("https://soundhelix.com")

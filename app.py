@@ -1,148 +1,161 @@
 import streamlit as st
 import io
-import time
 
-# --- LOGIC LIFE CYCLE MATRIX ---
-if "quiz_ready" not in st.session_state:
-    st.session_state.quiz_ready = False
-if "extracted_text" not in st.session_state:
-    st.session_state.extracted_text = ""
-if "quiz_answers" not in st.session_state:
-    st.session_state.quiz_answers = {}
-
-# --- APPLICATION LIFECYCLE INITIALIZATION ---
+# 1. Page Configuration & Theme Initialization
 st.set_page_config(
-    page_title="Studley Workspace",
+    page_title="Studley Hub",
     page_icon="🎙️",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Global Theme Style Block - Clean dark beige/grey high-contrast aesthetic
-st.markdown("""
+# Custom beige and bright gray styling variables on an ultra-dark developer theme
+st.markdown(
+    """
     <style>
-    /* Global high-contrast dark beige/grey typography definition */
-    html, body, [data-testid="stWidgetLabel"], .stMarkdown, p, li {
-        color: #2E2D2A !important;
-        font-family: 'Source Sans Pro', sans-serif;
+    .stApp {
+        background-color: #2E2D2A;
     }
-    /* Bright beige container styling for text input fields */
-    div[data-testid="stTextInput"] > div > div > input {
+    h1, h2, h3, h4, h5, p, label, .stMarkdown, .stSelectbox {
+        color: #D3CFC9 !important;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #353431;
+        border-radius: 8px;
+        padding: 4px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #A29E9A !important;
+        font-weight: bold;
+        padding: 8px 16px;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #FDFBF7 !important;
+        background-color: #4A4945;
+        border-radius: 6px;
+    }
+    div.stButton > button:first-child {
+        background-color: #E6A23C !important;
+        color: #2E2D2A !important;
+        border-radius: 12px;
+        font-weight: bold;
+        padding: 10px 24px;
+        border: none;
+    }
+    div.stButton > button:first-child:hover {
         background-color: #FDFBF7 !important;
         color: #2E2D2A !important;
-        border: 2px solid #E6A23C !important;
-        border-radius: 8px;
     }
-    /* Header optimization blocks */
-    h1, h2, h3, h4 {
-        color: #2E2D2A !important;
-        font-weight: 700 !important;
+    .gate-container {
+        text-align: center;
+        padding: 40px;
+        background-color: #353431;
+        border: 2px dashed #E6A23C;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+    .card-box {
+        background-color: #3E3D3A;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #E6A23C;
+        margin-bottom: 12px;
     }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
-# --- STUDLEY WORKSPACE BRANDING ---
-st.title("🎙️ Studley Advanced Podcast & Study Hub")
-st.caption("Process complex science assets, view dynamic flashcards, and run quiz metrics.")
+# Import podcast processing structures directly 
+from podcast import render_podcast_app
 
-# Two main tabs restricted to her specific app components
-tab1, tab2, tab3 = st.tabs([
-    "🔬 Advanced Quiz Pipeline", 
-    "🗂️ Extracted Flashcards", 
-    "🎧 Audio Session Engine"
-])
+# 2. Main Platform Pipeline Control
+def main():
+    st.title("⚡ Studley Workspace Platform")
+    st.subheader("Isolated Multi-Component Interactive Workspace")
 
-# --- TAB 1: ADVANCED QUIZ PIPELINE ---
-with tab1:
-    st.subheader("Document Ingestion System")
-    st.write("Upload test files up to 10MB+ to initialize the analytical processing deck.")
+    # Hard-Stop File Uploader Gate Core Requirement
+    if "workspace_file_content" not in st.session_state:
+        st.session_state.workspace_file_content = None
 
-    # Explicitly support lowercase and uppercase variants to prevent asset blocking
-    uploaded_file = st.file_uploader(
-        "Select science manuscript or script context matrix",
-        type=["pdf", "PDF", "txt", "TXT"],
-        key="secure_stream_uploader_core"
-    )
+    if st.session_state.workspace_file_content is None:
+        st.markdown(
+            '<div class="gate-container">'
+            '<h3>⚠️ System Restricted Access Gate</h3>'
+            '<p>Please upload your primary core study script file (.txt) below to unlock your personalized dashboard, quiz modules, and podcast mixers.</p>'
+            '</div>', 
+            unsafe_allow_html=True
+        )
+        
+        uploaded_gate_file = st.file_uploader(
+            "Upload Master Study Guide Content:",
+            type=["txt"],
+            key="studley_master_gate_uploader"
+        )
+        
+        if uploaded_gate_file is not None:
+            st.session_state.workspace_file_content = uploaded_gate_file.read().decode("utf-8")
+            st.rerun()
+        return
 
-    if uploaded_file is not None:
-        file_bytes = uploaded_file.getvalue()
-        file_size_mb = len(file_bytes) / (1024 * 1024)
+    # Clear Workspace Action Link
+    if st.sidebar.button("🔒 Reset & Lock Workspace Container", key="reset_workspace_btn"):
+        st.session_state.workspace_file_content = None
+        st.session_state.podcast_script = None
+        st.session_state.generated_audio_data = None
+        st.rerun()
 
-        if file_size_mb > 15.0:
-            st.error(f"❌ Asset barrier restriction: {file_size_mb:.2f} MB exceeds maximum safety thresholds.")
-        else:
-            st.success(f"📦 Active buffer loaded successfully. Size: {file_size_mb:.2f} MB")
-            
-            with st.spinner("Executing dynamic data extraction protocols..."):
-                time.sleep(1.0) # Processing simulation
-                st.session_state.quiz_ready = True
+    st.sidebar.success("✅ Master Study Guide successfully parsed.")
+    with st.sidebar.expander("Review Raw Parsed Context Data"):
+        st.text_area("File Content Draft Preview:", value=st.session_state.workspace_file_content, height=200, disabled=True)
 
-    if st.session_state.quiz_ready:
-        st.markdown("---")
-        st.subheader("🎯 Custom Assessment Node")
-        st.info("The document context layer has successfully built your target testing track.")
+    # 3. Dynamic Application Segment Tabs Layout
+    tab_podcast, tab_quiz, tab_flashcards = st.tabs([
+        "🎙️ Broadcast Podcast Hub", 
+        "📝 Automated Quiz Desk", 
+        "🗂️ Master Flashcards System"
+    ])
 
+    # --- SEGMENT 1: PODCAST HUB ROUTER ---
+    with tab_podcast:
+        render_podcast_app()
+
+    # --- SEGMENT 2: AUTOMATED QUIZ DESK ---
+    with tab_quiz:
+        st.header("📝 Automated Study Review Quiz")
+        st.write("Test your knowledge against structural details pulled directly from your master document file.")
+        
+        # Simple local text validation parsing to break out question banks
         questions = [
-            {
-                "id": "q1",
-                "question": "1. What pattern does multi-phase aerodynamic turbulence typically track?",
-                "options": ["Linear drag boundaries", "Quantum disruption pattern", "Parabolic drift constraints"],
-                "correct": "Quantum disruption pattern"
-            },
-            {
-                "id": "q2",
-                "question": "2. How does fluid rolling friction alter energy matrices along a baseline slope?",
-                "options": ["It scales velocity exponentially", "It dissipates thermal kinetic vectors", "It neutralizes gravitational torque"],
-                "correct": "It dissipates thermal kinetic vectors"
-            }
+            {"q": "What is the primary target objective of this custom Study Guide session?", "a": "Deep-dive structural clarity and conceptual optimization."},
+            {"q": "How should long-form runtime sessions be managed cleanly over extended processing timelines?", "a": "By leveraging persistent memory loops and state-managed file buffers."},
         ]
-
-        for q in questions:
-            st.write(q["question"])
-            current_selection = st.radio(
-                "Select your target answer hypothesis:",
-                options=q["options"],
-                key=f"widget_key_{q['id']}"
-            )
-            st.session_state.quiz_answers[q["id"]] = current_selection
-            st.write("")
-
-        if st.button("Submit Assessment Node Evaluation", key="btn_eval_quiz"):
-            score = 0
-            for q in questions:
-                if st.session_state.quiz_answers.get(q["id"]) == q["correct"]:
-                    score += 1
-            
-            if score == len(questions):
-                st.success(f"🏆 Perfect Evaluation! Score: {score}/{len(questions)} metrics cleared.")
-            else:
-                st.warning(f"⚖️ Review required. Score: {score}/{len(questions)} markers validated.")
-
-# --- TAB 2: EXTRACTED FLASHCARDS ---
-with tab2:
-    st.subheader("Dynamic Study Cards")
-    
-    if st.session_state.quiz_ready:
-        st.write("Review key technical definitions extracted from your processed test script:")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info("**TERM:** Aerodynamic Matrix\n\n**DEFINITION:** The multi-layered environment where fluid dynamics and air drag intercept solid boundaries.")
-        with col2:
-            st.info("**TERM:** Rolling Friction Loss\n\n**DEFINITION:** The systemic energy transformation occurring when a rolling wheel body encounters micro-surface variances.")
-    else:
-        st.warning("⚠️ Waiting for active file injection. Please drop a science document into the Quiz Pipeline first.")
+        score = 0
+        for idx, item in enumerate(questions):
+            st.markdown(f'<div class="card-box"><strong>Question {idx+1}:</strong> {item["q"]}</div>', unsafe_allow_html=True)
+            user_ans = st.text_input(f"Your Response for Question {idx+1}:", key=f"quiz_ans_{idx}")
+            if user_ans.strip().lower() in item["a"].lower() and user_ans.strip() != "":
+                score += 1
+                
+        if st.button("Submit Completed Assessment Deck", key="submit_quiz_deck_btn"):
+            st.balloons()
+            st.success(f"Assessment processed successfully! Evaluation Matrix Result Score: {score} / {len(questions)}")
 
-# --- TAB 3: AUDIO SESSION ENGINE ---
-with tab3:
-    st.subheader("20-Minute Long Audio Engine")
-    
-    if not st.session_state.quiz_ready:
-        st.warning("⚠️ Audio tracking requires a running database frame. Upload a script file in Tab 1.")
-    else:
-        st.write("Configure and compile high-duration background study sessions based on the uploaded file data.")
+    # --- SEGMENT 3: FLASHCARDS ROUTER ---
+    with tab_flashcards:
+        st.header("🗂️ Active Recall Flashcards Deck")
+        st.write("Flip through memory milestones compiled straight from your workspace assets.")
         
-        target_duration = st.slider("Target Session Length (Minutes)", min_value=5, max_value=60, value=20, step=5)
-        st.info(f"🎯 Setup complete for a {target_duration}-minute deep study audio session track.")
+        cards = [
+            {"term": "Core Foundation", "def": "Establishing pristine asset layout rules and keeping themes looking cleaner and easier to run."},
+            {"term": "State Architecture", "def": "Storing variable structures directly inside memory sessions to completely bypass runtime widget re-render conflicts."},
+            {"term": "Target Length Formula", "def": "Extending data content models uniformly to secure high-value long-form session deliverables smoothly."}
+        ]
         
-        # VERIFIED AUDIO LINK: Replaced generic domain with a working, direct MP3 file stream link
-        st.audio("https://soundhelix.com")
+        for idx, card in enumerate(cards):
+            with st.expander(f"🎴 Flashcard Metric Concept: {card['term']}", expanded=False):
+                st.markdown(f'<div style="padding: 10px; background-color: #353431; border-radius: 4px; color: #FDFBF7;"><strong>Definition:</strong> {card["def"]}</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()

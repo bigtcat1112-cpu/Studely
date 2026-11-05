@@ -57,9 +57,9 @@ if "custom_audio_data" not in st.session_state:
 
 def build_dynamic_script(topic, minutes, level):
     """
-    Builds a deeply comprehensive transcript list structure.
-    Uses target multipliers to aggressively loop content variations 
-    to guarantee a long-form audio stream delivery.
+    Builds an extensive conversational script matrix.
+    Uses runtime text multipliers to scale length up seamlessly 
+    for full 20-minute audio timelines.
     """
     if level == "Super Simple (5th Grade Style)":
         style_clause = "We're going to break this down using super easy examples, almost like building blocks or a video game tutorial!"
@@ -71,14 +71,12 @@ def build_dynamic_script(topic, minutes, level):
         style_clause = "We must systematically analyze the deep underlying algorithms, design architectures, and database relationships."
         host2_response = "Excellent. We will isolate individual component variables and review the data matrix."
 
-    # Base script blocks
     script_blocks = [
         ("Host 1 (Tristan)", f"Hey everyone, welcome back! Today we have an exciting long-form study stream about: {topic}."),
         ("Host 2 (Co-Host)", f"That's right! Tristan, I am excited for this one. {style_clause}"),
         ("Host 1 (Tristan)", f"Me too! {host2_response} Let's dive straight into the foundational rules.")
     ]
 
-    # Concrete sub-topics to explore in the deep-dive segments
     sub_modules = [
         "Core Concepts & Baseline Setup Rules",
         "Connecting the Moving Parts & Database Flow",
@@ -88,9 +86,7 @@ def build_dynamic_script(topic, minutes, level):
         "Advanced Optimization & Next Steps"
     ]
 
-    # Dynamic target text multiplier scaling math loop
-    # If she requests a 20-minute audio track, we loop the sub-topics multiple times
-    # with changing dialogue lines to ensure a massive text pool for gTTS to read.
+    # Target text multiplier logic loops to secure extensive reading content
     loop_multiplier = max(1, int(minutes // 3))
 
     for iteration in range(loop_multiplier):
@@ -101,7 +97,6 @@ def build_dynamic_script(topic, minutes, level):
                 ("Host 1 (Tristan)", f"Exactly. If you get that core part down, managing the rest of this workspace layout gets much easier.")
             ])
 
-    # Outro wrap-up sequence
     script_blocks.extend([
         ("Host 1 (Tristan)", "Wow, we have covered an incredible amount of information over this session length block."),
         ("Host 2 (Co-Host)", "Absolutely! Remember to review this audio file whenever you need a quick memory refresher. See you next time!"),
@@ -114,7 +109,6 @@ def render_podcast_app():
     st.title("🎙️ Sis's Custom Podcast Creator")
     st.subheader("Design Your Perfect Audio Learning Session")
     
-    # Read automatically from parent app uploader state
     source_text = st.session_state.get("workspace_file_content", "")
     if not source_text:
         source_text = st.text_area(
@@ -156,7 +150,6 @@ def render_podcast_app():
             key="sis_voice_accent"
         )
 
-    # FIXED: Direct mappings to distinct Top Level Domains (TLDs) for crisp voice changes
     tld_map = {
         "British Studio Voice": "co.uk",
         "Australian Studio Voice": "com.au",
@@ -168,45 +161,37 @@ def render_podcast_app():
     if st.button("🚀 Master & Generate Audio Show", key="trigger_sis_podcast"):
         with st.spinner("Processing custom audio tracks... This may take a moment for longer sessions."):
             
-            # Generate the expanded text array
             script = build_dynamic_script(source_text[:200], session_minutes, sim_level)
             st.session_state.custom_podcast_script = script
             
-            # Isolated binary file collector
             combined_audio = io.BytesIO()
             progress_bar = st.progress(0)
             
             for index, (speaker, speech_text) in enumerate(script):
-                # FIXED: Clear separation logic. Host 1 is strictly Tristan (US). Host 2 strictly maps the custom accent TLD.
                 if "Tristan" in speaker:
                     current_tld = "com"
                 else:
                     current_tld = selected_tld
                 
-                # Construct separate speech assets per row to break browser caching bugs
                 tts = gTTS(text=speech_text, lang="en", tld=current_tld, slow=False)
                 
                 temp_segment = io.BytesIO()
                 tts.write_to_fp(temp_segment)
                 temp_segment.seek(0)
                 
-                # Append raw sound stream sequentially into main memory deck
                 combined_audio.write(temp_segment.read())
-                
-                # Scale progress tracking indicators cleanly
                 progress_bar.progress((index + 1) / len(script))
                 
             combined_audio.seek(0)
             st.session_state.custom_audio_data = combined_audio.getvalue()
             st.balloons()
 
-    # Visual Output Rendering Gate
-    if st.session_state.custom_podcast_script:
+    # SAFE SYSTEM GATE: Prevents KeyError crashes on first load
+    if st.session_state.get("custom_podcast_script") is not None:
         st.write("---")
         st.subheader("🎧 Playback Deck & Script Display")
         
-        if st.session_state.custom_audio_data:
-            # Force fresh layout loading using unique memory state outputs
+        if st.session_state.get("custom_audio_data") is not None:
             st.audio(st.session_state.custom_audio_data, format="audio/mp3")
             
             st.download_button(

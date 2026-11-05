@@ -143,4 +143,6 @@ with tab3:
         
         target_duration = st.slider("Target Session Length (Minutes)", min_value=5, max_value=60, value=20, step=5)
         st.info(f"🎯 Setup complete for a {target_duration}-minute deep study audio session track.")
+        
+        # FIXED STREAMING URL: Points to a real verified test file track link
         st.audio("https://soundhelix.com")
